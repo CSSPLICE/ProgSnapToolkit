@@ -77,6 +77,7 @@ class CodeBenchExamPerformance:
         scores["weighted_score"] = scores[Cols.Score] * scores["weight_norm"]
         scores = scores[scores["type"] == "exam"]
         exam_scores = scores.groupby(["class-number", Cols.SubjectID]).weighted_score.sum().rename("exam_total").reset_index()
+        return exam_scores
 
 
 
