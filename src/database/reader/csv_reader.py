@@ -27,7 +27,9 @@ class CSVReader(PS2Reader):
         pass
 
     def get_link_table(self, table_name) -> DataFrame:
-        path = os.path.join(self.data_config.root_path, self._LINK_TABLES_DIR, f"{table_name}.csv")
+        if not table_name.lower().endswith('.csv'):
+            table_name += '.csv'
+        path = os.path.join(self.data_config.root_path, self._LINK_TABLES_DIR, table_name)
         return self._get_table(path)
 
     def get_metadata_table(self) -> DataFrame:

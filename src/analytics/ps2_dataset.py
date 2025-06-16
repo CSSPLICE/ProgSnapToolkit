@@ -27,6 +27,17 @@ class Preprocessor(ABC):
         """
         pass
 
+class LinkTablePreprocessor(ABC):
+    """
+    Base class for preprocessors that can be applied to the link table.
+    """
+
+    @abstractmethod
+    def apply(self, dataset: "PS2Dataset", link_table_name, link_table: DataFrame) -> DataFrame:
+        """
+        Apply preprocessing to the link table.
+        """
+        pass
 
 
 
@@ -42,6 +53,7 @@ class PS2Dataset:
             SortPreprocessor(),
             TimePreprocessor(),
         ]
+        self.link_table_preprocessors = []
 
         self.get_metadata_table()
 
@@ -85,6 +97,16 @@ class PS2Dataset:
         for preprocessor in self.main_table_preprocessors:
             self._main_table = preprocessor.apply(self, self._main_table)
         return self._main_table.copy()
+
+    def get_link_table(self, table_name: str) -> DataFrame:
+        """
+        Returns the link table as a DataFrame.
+        """
+        with self.factory.create_reader() as reader:
+            link_table = reader.get_link_table(table_name)
+        for preprocessor in self.link_table_preprocessors:
+            link_table = preprocessor.apply(self, table_name, link_table)
+        return link_table
 
 
 class SortPreprocessor(Preprocessor):
