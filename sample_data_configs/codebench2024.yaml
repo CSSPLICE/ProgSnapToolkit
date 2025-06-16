@@ -1,0 +1,9 @@
+root_path: sample_data/codebench/2024
+optimize_codestate_ids: true
+main_table_file: MainTable.csv
+
+metadata:
+  Version: "1.0"
+  IsEventOrderingConsistent: true
+  EventOrderScope: Global
+  CodeStateRepresentation: Git

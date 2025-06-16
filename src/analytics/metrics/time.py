@@ -13,7 +13,7 @@ class TimeMetrics:
     The time spent actively working on a problem, ignoring idle time and breaks,
     as well as time after the first correct attempt.
     """
-    IDLE_TIME: Final[str] = "IdleTime"
+    PASSIVE_TIME: Final[str] = "PassiveTime"
     """
     The time spent idle, not actively working on a problem. Does not inclide breaks,
     as well as time after the first correct attempt.
@@ -90,9 +90,9 @@ class TimeMetrics:
             delta_seconds = delta_seconds[~negative_deltas]  # Remove negative deltas
         n_breaks = (delta_seconds > self.break_gap).sum()
         non_break_seconds = delta_seconds[delta_seconds <= self.break_gap]
-        idle_time = non_break_seconds[non_break_seconds > self.idle_gap].sum()
+        passive_time = non_break_seconds[non_break_seconds > self.idle_gap].sum()
         total_time = non_break_seconds.sum()
-        active_time = total_time - idle_time
+        active_time = total_time - passive_time
 
         active_time_after_correct = 0
         if time_series_after_correct is not None:
@@ -102,7 +102,7 @@ class TimeMetrics:
 
         time_metrics = {
             self.ACTIVE_TIME: active_time,
-            self.IDLE_TIME: idle_time,
+            self.PASSIVE_TIME: passive_time,
             self.TOTAL_TIME: total_time,
             self.ACTIVE_TIME_AFTER_CORRECT: active_time_after_correct,
             self.N_BREAKS: n_breaks,

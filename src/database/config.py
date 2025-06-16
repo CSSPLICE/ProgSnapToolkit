@@ -39,6 +39,8 @@ class PS2DataConfig(BaseModel):
     """Relative path to the main table CSV file."""
     codestates_table_relative_path: str = "CodeStates.csv"
     """Relative path to the CodeStates table CSV file."""
+    metadata_file: str = "DatasetMetadata.csv"
+    """Relative path to the metadata CSV file."""
 
     # Config for SQL/SQLite format
     sqlalchemy_url: str = None
@@ -57,6 +59,10 @@ class PS2DataConfig(BaseModel):
     @property
     def codestates_table_path(self) -> str:
         return os.path.join(self.root_path, self.codestates_table_relative_path)
+
+    @property
+    def metadata_path(self) -> str:
+        return os.path.join(self.root_path, self.metadata_file)
 
     @property
     def main_table_path(self) -> str:

@@ -39,9 +39,9 @@ class IOFactory(ABC):
             else:
                 return SQLTableCodeStateWriter(context)
         elif code_state_representation == CodeStateRepresentation.Directory:
-            raise DirectoryCodeStateWriter(db_config.codestates_dir)
+            return DirectoryCodeStateWriter(db_config.codestates_dir)
         elif code_state_representation == CodeStateRepresentation.Git:
-            raise GitCodeStateWriter(db_config.codestates_dir)
+            return GitCodeStateWriter(db_config.codestates_dir)
         else:
             raise ValueError(f"Invalid code state representation: {code_state_representation}")
 

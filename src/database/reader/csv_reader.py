@@ -31,7 +31,7 @@ class CSVReader(PS2Reader):
         return self._get_table(path)
 
     def get_metadata_table(self) -> DataFrame:
-        path = os.path.join(self.context.data_config.root_path, "Metadata.csv")
+        path = self.context.data_config.metadata_path
         return self._get_table(path)
 
     def get_link_table_names(self) -> list[str]:

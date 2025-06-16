@@ -1,6 +1,7 @@
 root_path: sample_data/cwo/s19
 optimize_codestate_ids: true
 main_table_file: MainTable.csv
+metadata_file: Metadata.csv
 codestates_table_relative_path: LinkTables/CodeStates.csv
 
 metadata:
