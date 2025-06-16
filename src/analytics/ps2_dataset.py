@@ -50,7 +50,7 @@ class PS2Dataset:
         self._main_table: DataFrame = None
         self._metadata_table: DataFrame = None
         self.main_table_preprocessors = [
-            SortPreprocessor(),
+            # SortPreprocessor(), # Can be quite expensive, so disabled by default
             TimePreprocessor(),
         ]
         self.link_table_preprocessors = []
