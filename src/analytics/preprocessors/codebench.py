@@ -1,4 +1,5 @@
 
+import os
 import pandas as pd
 from analytics.ps2_dataset import LinkTablePreprocessor, Preprocessor
 import yaml
@@ -29,7 +30,7 @@ class YAMLLinkURLPreprocessor(LinkTablePreprocessor):
         # Fixes a bug in an early draft
         if url.startswith("./output"):
             url = url.replace("./output", "")
-        url = self.root_path + url
+        url = os.path.join(self.root_path, url)
         try:
             with open(url, 'r') as file:
                 return yaml.safe_load(file)
