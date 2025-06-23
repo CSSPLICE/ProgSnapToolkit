@@ -77,6 +77,7 @@ class ErrorMetrics:
 
     def calculate(self, rows: DataFrame) -> dict[str, any]:
         error_quotient = self.calculate_eq(rows)
+        # TODO: Add Hoq et al.'s error measure
         return Series({
             self.ERROR_QUOTIENT: error_quotient
         })

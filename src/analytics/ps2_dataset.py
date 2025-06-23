@@ -116,7 +116,6 @@ class SortPreprocessor(Preprocessor):
 
     def __init__(self, sort_column: str = Cols.Order.value):
         self.sort_column = sort_column
-        super().__init__()
 
     def apply(self, dataset: PS2Dataset, main_table: DataFrame) -> DataFrame:
         if self.sort_column not in main_table.columns:
