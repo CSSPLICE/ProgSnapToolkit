@@ -1,6 +1,6 @@
 
 from pandas import DataFrame
-from analytics.metrics.metric import Metric
+from analytics.metrics.drafts.metric import Metric
 from spec.enums import MainTableColumns as Cols
 
 CORRECT_SCORE = 1

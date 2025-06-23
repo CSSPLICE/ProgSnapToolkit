@@ -1,7 +1,6 @@
 
 from typing import Final
 from pandas import DataFrame, Series
-from analytics.metrics.metric import LambdaMetric
 from spec.enums import MainTableColumns as Cols, EventType
 import numpy as np
 
