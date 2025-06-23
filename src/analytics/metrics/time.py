@@ -1,6 +1,7 @@
 
 from typing import Final
 from pandas import DataFrame, Series
+from analytics.ps2_dataset import PS2Dataset
 from spec.enums import MainTableColumns as Cols
 import numpy as np
 
@@ -55,6 +56,7 @@ class TimeMetrics:
         self.break_gap = break_gap
         self.time_col = time_col
         self.sort_first = not is_data_already_time_sorted
+
 
     def calculate(self, rows: DataFrame) -> dict[str, any]:
         if self.sort_first:

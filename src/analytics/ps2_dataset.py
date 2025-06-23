@@ -114,8 +114,13 @@ class SortPreprocessor(Preprocessor):
     Preprocessor that sorts the DataFrame according to the metadata.
     """
 
+    def __init__(self, sort_column: str = Cols.Order.value):
+        self.sort_column = sort_column
+        super().__init__()
+
     def apply(self, dataset: PS2Dataset, main_table: DataFrame) -> DataFrame:
-        if Cols.Order not in main_table.columns:
+        if self.sort_column not in main_table.columns:
+            print(f"Warning: Column '{self.sort_column}' not found in the main table, skipping sorting.")
             return main_table
         if not dataset.get_metadata_property(MetadataProps.IsEventOrderingConsistent):
             return main_table
@@ -129,7 +134,7 @@ class SortPreprocessor(Preprocessor):
             if order_columns is None or len(order_columns) == 0:
                 raise Exception('EventOrderScope is restricted but no EventOrderScopeColumns given')
             columns = order_columns.split(';')
-            columns.append('Order')
+            columns.append(self.sort_column)
             # The result is that _within_ these groups, events are ordered
             self.main_table.sort_values(by=columns, inplace=True)
         return main_table
