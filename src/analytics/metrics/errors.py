@@ -142,4 +142,5 @@ class ErrorMetrics:
         return Series({
             self.ERROR_QUOTIENT: error_quotient,
             self.REPEATED_ERROR_DENSITY: self.calculate_red(rows),
+            self.FAILED_COMPILE_COUNT: self.calculate_failed_compile_count(rows),
         })
