@@ -20,9 +20,10 @@ class ErrorMetrics:
     Becker's
     """
 
-    COMPILE_ERROR_COUNT: Final[str] = "CompileErrorCount"
+    FAILED_COMPILE_COUNT: Final[str] = "FailedCompileCount"
     """
-    The count of total compile errors in a submission, used by Hoq et al. (2023).
+    The count of total compiles that had at least one error,
+    used by Hoq et al. (2023).
     """
 
     def __init__(self, is_data_sorted: bool,
@@ -124,6 +125,16 @@ class ErrorMetrics:
 
     def calculate_red(self, rows: DataFrame) -> float | None:
         return self._calculate_paired_compilation_metric(rows, self._red_scorer)
+
+    def calculate_failed_compile_count(self, rows: DataFrame) -> int:
+        """
+        Calculate the total number of compile errors in the given rows.
+        This is used by Hoq et al. (2023) as a measure of compile error frequency.
+        """
+        # We count the ParentEventIDs of compile errors. If there was no
+        # error, the ParentEventID will not be included, so this only counts
+        # the number of unique compile events that had at least one error.
+        return rows[rows[Cols.EventType] == self.compile_error_event][Cols.ParentEventID].nunique()
 
     def calculate(self, rows: DataFrame) -> dict[str, any]:
         error_quotient = self.calculate_eq(rows)
