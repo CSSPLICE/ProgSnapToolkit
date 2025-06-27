@@ -3,8 +3,31 @@ import os
 import pandas as pd
 from analytics.ps2_dataset import LinkTablePreprocessor, Preprocessor
 import yaml
-from spec.enums import MainTableColumns as Cols
+from spec.enums import MainTableColumns as Cols, EventType
 
+class CodeBenchAddParentEventIDs(Preprocessor):
+    """
+    Preprocessor that adds the ParentEventID column and links Run.Test
+    events to the Submit events that created them.
+    """
+
+    def apply(self, dataset, main_table):
+        # We've already verified that all Submit events come with 1+ RunTest events
+        # That share a ServerTimestamp. This function generates the ParentEventID
+        # column for RunTest events, linking them to the Submit event that created them.
+
+        # First create a map linking (SubjectID, AssignmentID, ServerTimestamp) to EventID
+        submit_map = main_table[main_table[Cols.EventType] == EventType.Submit].set_index(
+            [Cols.SubjectID, Cols.AssignmentID, Cols.ServerTimestamp]
+        )[Cols.EventID]
+
+        # Then assign ParentEventID for RunTest events
+        run_mask = main_table[Cols.EventType] == EventType.RunTest
+        main_table.loc[run_mask, Cols.ParentEventID] = main_table.loc[run_mask, [Cols.SubjectID, Cols.AssignmentID, Cols.ServerTimestamp]] \
+            .apply(tuple, axis=1) \
+            .map(submit_map)
+
+        return main_table
 
 class YAMLLinkURLPreprocessor(LinkTablePreprocessor):
 

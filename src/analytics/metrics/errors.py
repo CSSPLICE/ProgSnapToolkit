@@ -20,16 +20,27 @@ class ErrorMetrics:
     Becker's
     """
 
-    def __init__(self, is_data_sorted: bool, compile_event: str = EventType.Compile.value):
+    COMPILE_ERROR_COUNT: Final[str] = "CompileErrorCount"
+    """
+    The count of total compile errors in a submission, used by Hoq et al. (2023).
+    """
+
+    def __init__(self, is_data_sorted: bool,
+                 compile_message_type_column: str = Cols.CompileMessageType,
+                 compile_event: str = EventType.Compile,
+                 compile_error_event: str = EventType.CompileError
+                 ):
         if not is_data_sorted:
             # TODO: Could also have a sort method that sorts the data
             raise ValueError("Data must be sorted calculating Error metrics.")
+        self.compile_message_type_column = compile_message_type_column
         self.compile_event = compile_event
+        self.compile_error_event = compile_error_event
 
     def _calculate_paired_compilation_metric(self, rows: DataFrame, scorer) -> float | None:
         # Get all compile events and compile errors
-        compiles = rows[rows[Cols.EventType] == EventType.Compile]
-        compile_errors = rows[rows[Cols.EventType] == EventType.CompileError]
+        compiles = rows[rows[Cols.EventType] == self.compile_event]
+        compile_errors = rows[rows[Cols.EventType] == self.compile_error_event]
 
         if len(compiles) >= 1 and len(compile_errors) == 0:
             # ASSUMPTION: If there was at least one successful compile and
@@ -61,8 +72,8 @@ class ErrorMetrics:
             e1_errors = compile_errors[compile_errors[Cols.ParentEventID] == error_event_id_1]
             e2_errors = compile_errors[compile_errors[Cols.ParentEventID] == error_event_id_2]
 
-            e1_error_types = e1_errors[Cols.CompileMessageType].to_list()
-            e2_error_types = e2_errors[Cols.CompileMessageType].to_list()
+            e1_error_types = e1_errors[self.compile_message_type_column].to_list()
+            e2_error_types = e2_errors[self.compile_message_type_column].to_list()
 
             type_tuples.append((e1_error_types, e2_error_types))
 
@@ -118,5 +129,6 @@ class ErrorMetrics:
         error_quotient = self.calculate_eq(rows)
         # TODO: Add Hoq et al.'s error measure
         return Series({
-            self.ERROR_QUOTIENT: error_quotient
+            self.ERROR_QUOTIENT: error_quotient,
+            self.REPEATED_ERROR_DENSITY: self.calculate_red(rows),
         })
