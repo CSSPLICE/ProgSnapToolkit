@@ -1,6 +1,6 @@
-root_path: sample_data/edwards/raw/2021
+root_path: sample_data/edwards/2021
 optimize_codestate_ids: true
-main_table_file: keystrokes.csv
+main_table_file: MainTable.csv
 codestates_table_relative_path: TBD
 
 metadata:
