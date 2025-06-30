@@ -15,6 +15,24 @@ class TimeStampToDateTimePreprocessor(Preprocessor):
         main_table.sort_values(by=[Cols.ClientTimestamp, Cols.EventID], inplace=True)
         return main_table
 
+class ClassSubsetPreprocessor(Preprocessor):
+    """
+    Preprocessor that filters the dataset to only include events from the given semester.
+    """
+
+    def __init__(self, semester: str):
+        """
+        :param semester: The semester to filter by, e.g. "Spring" or "Fall".
+        """
+        self.semester = semester
+
+    def apply(self, dataset: PS2Dataset, main_table: DataFrame) -> DataFrame:
+        if self.semester not in ["Spring", "Fall"]:
+            raise ValueError(f"Invalid semester: {self.semester}. Must be 'Spring' or 'Fall'.")
+        filtered_table = main_table[main_table["X-ClassID"] == self.semester]
+        filtered_table.drop(columns=["X-ClassID"], inplace=True, errors='ignore')
+        return filtered_table
+
 class AddErrors2021Preprocessor(Preprocessor):
     """
     Preprocessor that adds error messages to the main table.
