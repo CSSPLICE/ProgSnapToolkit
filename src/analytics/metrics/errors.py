@@ -136,6 +136,174 @@ class ErrorMetrics:
         # the number of unique compile events that had at least one error.
         return rows[rows[Cols.EventType] == self.compile_error_event][Cols.ParentEventID].nunique()
 
+    def _get_resolution_stats(self, main_table: DataFrame, grouping_cols):
+        relevant_event_types = [
+            EventType.Compile,
+            EventType.CompileError,
+        ]
+        compile_events = main_table[main_table[Cols.EventType].isin(relevant_event_types)].copy()
+        # compile_events.groupby(grouping_cols
+
+        # main_table.groupby(grouping_cols)
+        # main_table.groupby(Cols.CompileMessageType).apply()
+
+
+    # TODO: This version doesn't consider the error type, so the
+    # averages aren't error-type-specific.
+    def _watwin_time_preprocessing(self, main_table_df):
+        # Watson et al. (2013) doesn't state how they get mean and sd, we assume
+        # both mean and sd calculated from all compilation pairs
+
+        time_arr = {}
+        mean_dict = {}
+        std_dict = {}
+
+        subjects = set(main_table_df[Cols.SubjectID])
+        timer_index = 1
+        for subj in subjects:
+            timer_index += 1
+
+            current_df = main_table_df.loc[main_table_df[Cols.SubjectID] == subj]
+            compiles = current_df[current_df[Cols.EventType] == self.compile_event]
+            compile_errors = current_df[current_df[Cols.EventType] == self.compile_error_event]
+
+            should_check_codestates = current_df[Cols.CodeStateID].notna().any()
+
+            sum_time = 0
+            count_time = 0
+
+            if len(compiles) > 1:
+                time_arr[subj] = {}
+                for i in range(len(compiles) - 1):
+                    # Watson(2013) requires pair pruning, in which Remove identical pairs
+                    if not should_check_codestates or (compiles[Cols.CodeStateID].iloc[i + 1] != compiles[Cols.CodeStateID].iloc[i]):
+                        e1_errors = compile_errors[compile_errors[Cols.ParentEventID] == compiles["EventID"].iloc[i]]
+                        # If e1 compile resulted in error
+                        if len(e1_errors) > 0:
+                            # Watson(2013) requires time estimate preparation before calculating score, we assume no
+                            # invocation reported in dataset, which means using time difference of compilcation pairs
+                            # directly
+                            date1 = compiles[self.time_column].iloc[i + 1]
+                            date2 = compiles[self.time_column].iloc[i]
+                            time_diff = (date1 - date2).total_seconds()
+                            sum_time += time_diff
+                            count_time = count_time + 1
+                            time_arr[subj][compiles[Cols.CodeStateID].iloc[i]] = time_diff
+
+            if count_time != 0:
+                mean_time = sum_time / count_time
+                std_time = np.std(np.asarray(list(time_arr[subj].values())))
+            else:
+                mean_time = 0
+                std_time = 0
+
+            mean_dict[subj] = mean_time
+            std_dict[subj] = std_time
+
+        return time_arr, mean_dict, std_dict
+
+
+    def calculate_watwin(session_table):
+        # Watson(2013) requires 1) deletion fixes 2) commented fixes during data preparation 3) error message
+        # generalization, we assume the dataset has fulfilled this requirement
+        session_table = session_table.sort_values(by=['Order'])
+        compiles = session_table[session_table[Cols.EventType] == "Compile"]
+        compile_errors = session_table[session_table[Cols.EventType] == "Compile.Error"]
+
+        if len(compiles) <= 1:
+            return None
+
+        # Begin calculate WatWin scores:
+        score = 0
+        pair_count = 0
+
+        for i in range(len(compiles) - 1):
+            # Only look at consecutive compiles within a single assignment/problem/session
+            changed_segments = False
+            for segment_id in ["SessionID", "ProblemID", "AssignmentID"]:
+                if segment_id not in compiles:
+                    continue
+                if compiles[segment_id].iloc[i] != compiles[segment_id].iloc[i + 1]:
+                    changed_segments = True
+                    break
+            if changed_segments:
+                continue
+
+            pair_count += 1
+
+            # Watson(2013) requires pair pruning, in which Remove identical pairs
+            if compiles[Cols.CodeStateID].iloc[i] != compiles[Cols.CodeStateID].iloc[i + 1]:
+
+                # Get all compile errors associated with compile events e1 and e2
+                e1_errors = compile_errors[compile_errors[Cols.ParentEventID] == compiles["EventID"].iloc[i]]
+                e2_errors = compile_errors[compile_errors[Cols.ParentEventID] == compiles["EventID"].iloc[i + 1]]
+
+                # if former event has error
+                if len(e1_errors) > 0:
+
+                    # if later event has error
+                    if len(e2_errors) > 0:
+
+                        # Get the set of errors shared by both compiles
+                        shared_errors = set(e1_errors["CompileMessageType"]).intersection(
+                            set(e2_errors["CompileMessageType"]))
+
+                        # TODO: Don't just use the first compile message - use all
+                        # if same full message
+                        # We assume the attribute containing full message is CompileMessageData
+                        e1_error_message = e1_errors["CompileMessageData"].iloc[0]
+                        e2_error_message = e2_errors["CompileMessageData"].iloc[0]
+                        if e1_error_message == e2_error_message:
+                            score += 4
+                            # if same error type
+                        if len(shared_errors) > 0:
+                            score += 4
+                        # TODO: Watson (2013) requires for error line number of compiled code
+                        # if same line
+                        try:
+                            if e1_errors["SourceLocation"].iloc[0].split(':')[1] == \
+                                    e2_errors["SourceLocation"].iloc[0].split(':')[1]:
+                                score += 2
+                        except:
+                            out.info("Improperly formatted source location in: [%s, %s]" % (
+                                e1_errors["SourceLocation"].iloc[0], e2_errors["SourceLocation"].iloc[0]))
+
+                        # if time < M - 1SD
+                        if compiles["TimeEst"].iloc[i] < (
+                                compiles["TimeMean"].iloc[i] - compiles["TimeStd"].iloc[i]):
+                            score += 1
+                        # if time >= M - 1SD
+                        else:
+                            # if time > M + 1SD
+                            if compiles["TimeEst"].iloc[i] > (
+                                    compiles["TimeMean"].iloc[i] + compiles["TimeStd"].iloc[i]):
+                                score += 25
+                            # if time <= M + 1SD
+                            else:
+                                score += 15
+                    # if later event does not have error
+                    else:
+                        # if time < M - 1SD
+                        if compiles["TimeEst"].iloc[i] < (
+                                compiles["TimeMean"].iloc[i] - compiles["TimeStd"].iloc[i]):
+                            score += 1
+                        # if time >= M - 1SD
+                        else:
+                            # if time > M + 1SD
+                            if compiles["TimeEst"].iloc[i] > (
+                                    compiles["TimeMean"].iloc[i] + compiles["TimeStd"].iloc[i]):
+                                score += 25
+                            # if time <= M + 1SD
+                            else:
+                                score += 15
+
+        if pair_count == 0:
+            return None
+
+        watwin = (score / 35.) / (len(compiles) - 1.)
+        return watwin
+
+
     def calculate(self, rows: DataFrame) -> dict[str, any]:
         error_quotient = self.calculate_eq(rows)
         # TODO: Add Hoq et al.'s error measure
