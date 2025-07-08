@@ -184,3 +184,18 @@ class TimePreprocessor(Preprocessor):
 
         if len(converted) == len(timestamp_strings):
             main_table[time_column_name] = converted
+
+class FilterPreprocessor(Preprocessor):
+    """
+    Preprocessor that filters columns in the DataFrame.
+    """
+
+    def __init__(self, filter_column: str, filter_value):
+        self.filter_column = filter_column
+        self.filter_value = filter_value
+
+    def apply(self, dataset: PS2Dataset, main_table: DataFrame) -> DataFrame:
+        """
+        Filters the DataFrame to keep only the specified columns.
+        """
+        return main_table[main_table[self.filter_column] == self.filter_value].copy()
