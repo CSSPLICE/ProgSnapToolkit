@@ -6,4 +6,4 @@ metadata:
   Version: "1.0"
   IsEventOrderingConsistent: true
   EventOrderScope: Global
-  CodeStateRepresentation: Git
+  CodeStateRepresentation: Table

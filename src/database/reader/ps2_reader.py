@@ -31,3 +31,11 @@ class PS2Reader(ABC):
     @abstractmethod
     def get_link_table_names(self) -> list[str]:
         pass
+
+    @abstractmethod
+    def get_codestates_table(self) -> DataFrame:
+        pass
+
+    @abstractmethod
+    def get_codestates_table_subset(self, codestate_ids: list[str]) -> DataFrame:
+        pass

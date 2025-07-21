@@ -3,6 +3,8 @@
 # and apply appropriate preprocessing steps, e.g. sorting
 # and provide convenience methods.
 
+import pandas as pd
+
 from abc import ABC, abstractmethod
 from pandas import DataFrame
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
@@ -66,7 +68,7 @@ class PS2Dataset:
         try:
             with self.factory.create_reader() as reader:
                 self._metadata_table = reader.get_metadata_table()
-        except FileNotFoundError:
+        except (FileNotFoundError, ValueError):
             # If the metadata table is not found, create an empty one
             self._metadata_table = DataFrame()
             print("Warning: Metadata table not found, creating an empty metadata table.")
@@ -107,6 +109,20 @@ class PS2Dataset:
         for preprocessor in self.link_table_preprocessors:
             link_table = preprocessor.apply(self, table_name, link_table)
         return link_table
+
+    def get_codestates(self, codestate_ids: list[str] | pd.Series = None) -> DataFrame:
+        """
+        Returns the CodeStates table as a DataFrame, optionally collecting
+        only a subset rows matching the given CodeStateIDs. This is useful
+        for larger datasets, where all CodeStates may not fit in memory.
+        """
+        if codestate_ids is isinstance(codestate_ids, pd.Series):
+            codestate_ids = codestate_ids.tolist()
+        with self.factory.create_reader() as reader:
+            if codestate_ids is None:
+                return reader.get_codestates_table()
+            else:
+                return reader.get_codestates_table_subset(codestate_ids)
 
 
 class SortPreprocessor(Preprocessor):
