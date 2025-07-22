@@ -98,4 +98,3 @@ class PS2DataConfig(BaseModel):
         config = cls(**data)
         config.validate_metadata(spec)
         return config
-
