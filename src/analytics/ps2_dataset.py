@@ -49,30 +49,14 @@ class PS2Dataset:
         self.spec = spec
         self.data_config = data_config
         self.factory = IOFactory.create_factory(data_config)
-        self._main_table: DataFrame = None
-        self._metadata_table: DataFrame = None
+        self._main_table: DataFrame | None = None
+        # Factory now handles loading metadata
+        self.metadata_values = self.factory.db_config.metadata
         self.main_table_preprocessors = [
             # SortPreprocessor(), # Can be quite expensive, so disabled by default
             TimePreprocessor(),
         ]
         self.link_table_preprocessors = []
-
-        self.get_metadata_table()
-
-    def get_metadata_table(self) -> DataFrame:
-        """
-        Returns the metadata table as a DataFrame.
-        """
-        if self._metadata_table is not None:
-            return self._metadata_table.copy()
-        try:
-            with self.factory.create_reader() as reader:
-                self._metadata_table = reader.get_metadata_table()
-        except (FileNotFoundError, ValueError):
-            # If the metadata table is not found, create an empty one
-            self._metadata_table = DataFrame()
-            print("Warning: Metadata table not found, creating an empty metadata table.")
-        return self._metadata_table.copy()
 
     def get_metadata_property(self, property_name: str) -> any:
         """
@@ -80,13 +64,10 @@ class PS2Dataset:
         :param property_name: The name of the metadata property.
         :return: The value of the metadata property, or None if not found.
         """
-        if property_name in self._metadata_table.columns:
-            return self._metadata_table[property_name].iloc[0]
-        property = self.spec.metadata.get_property(property_name)
-        if property is not None:
-            print(f"Warning: Metadata property '{property_name}' not found in the dataset, using default value: {property.default_value}")
-            return property.default_value
-        raise ValueError(f"Metadata property '{property_name}' not found in the dataset.")
+        if not hasattr(self.metadata_values, property_name):
+            print(f"Warning: Metadata property '{property_name}' not found.")
+            return None
+        return getattr(self.metadata_values, property_name)
 
     def get_main_table(self) -> DataFrame:
         """

@@ -14,25 +14,11 @@ def create_metadata_values_model(metadata_spec: Metadata) -> type[BaseModel]:
     return create_model("MetadataValues", **fields)
 
 class PS2DataConfig(BaseModel):
-    # TODO: Should this be relative to this file? Or to the running script...
-    # Or should the root folder be provided in code (which knows the relative path)
-    # and then this can exist anywhere... or could be always in the dataset folder?
     root_path: str
     """The root directory of the PrgoSnap2 dataset."""
 
-    # TODO: It doesn't really make sense to include this in the config
-    # especially for reading, since it would be provided by the dataset!
-    metadata: object
-
-    # TODO: This also doesn't really make sense for reading
-    optimize_codestate_ids: bool
-    """If true, provided CodeStateIDs are assumed to be local
-    to each logging call and will be regenerated to be globally
-    unique. If false, the provided CodeStateIDs are used directly.
-    """
-
-    # TODO: Nor does this
-    codestates_have_sections: bool = True
+    metadata: object = None
+    """Metadata for the dataset. If None, it will be loaded from the metadata file."""
 
     # Config for CSV format
     main_table_file: str = None
@@ -92,9 +78,22 @@ class PS2DataConfig(BaseModel):
             return False
 
     @classmethod
-    def from_yaml(cls, yaml_path: str, spec: ProgSnap2Spec) -> "PS2DataConfig":
+    def from_yaml(cls, yaml_path: str, spec: ProgSnap2Spec) -> "PS2DataWriteConfig":
         with open(yaml_path, "r") as file:
             data = yaml.safe_load(file)
         config = cls(**data)
         config.validate_metadata(spec)
         return config
+
+
+class PS2DataWriteConfig(PS2DataConfig):
+
+    # TODO: This also doesn't really make sense for reading
+    optimize_codestate_ids: bool
+    """If true, provided CodeStateIDs are assumed to be local
+    to each logging call and will be regenerated to be globally
+    unique. If false, the provided CodeStateIDs are used directly.
+    """
+
+    # TODO: Nor does this
+    codestates_have_sections: bool = True

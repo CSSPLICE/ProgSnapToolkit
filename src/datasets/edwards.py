@@ -43,3 +43,5 @@ F19 = replace(_base_2019_config,
 F19.main_table_preprocessors.append(
     ClassSubsetPreprocessor("Fall")
 )
+
+# TODO: Need to figure out what to do with the "Group" column in the grades link table

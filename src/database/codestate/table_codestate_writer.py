@@ -1,14 +1,14 @@
 import csv
 from sqlalchemy import insert
 from database.codestate.codestate_writer import ContextualCodeStateEntry, CodeStateWriter
-from database.config import PS2DataConfig
+from database.config import PS2DataWriteConfig
 from database.sql_context import IOContext, SQLContext
 from spec.enums import CodeStatesTableColumns as Cols
 import os
 
 class CSVTableCodeStateWriter(CodeStateWriter):
 
-    def __init__(self, data_config: PS2DataConfig):
+    def __init__(self, data_config: PS2DataWriteConfig):
         super().__init__()
         self.config = data_config
         self.written_codestate_ids = set()

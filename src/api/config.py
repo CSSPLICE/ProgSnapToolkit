@@ -3,7 +3,7 @@
 import yaml
 from pydantic import BaseModel, create_model
 
-from database.config import PS2DataConfig
+from database.config import PS2DataWriteConfig
 from spec.spec_definition import ProgSnap2Spec
 
 
@@ -14,7 +14,7 @@ class CORSConfig(BaseModel):
     allow_headers: list[str] = ["*"]
 
 class PS2APIConfig(BaseModel):
-    database_config: PS2DataConfig
+    database_config: PS2DataWriteConfig
 
     add_server_timestamps: bool = True
     cors_config: CORSConfig = CORSConfig()

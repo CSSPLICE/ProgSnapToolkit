@@ -131,6 +131,7 @@ class SQLTableManager:
             cols_etc = [
                 SQLColumn(CodeCols.CodeStateID, id_datatype, nullable=False),
             ]
+            # Requires a write config, but worst case it just defaults to None/false here
             if self.db_config.codestates_have_sections:
                 cols_etc.append(SQLColumn(CodeCols.CodeStateSection, path_datatype, nullable=True))
             cols_etc.extend([

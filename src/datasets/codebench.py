@@ -31,3 +31,16 @@ F24 = replace(_base_config,
     start_time="2024-09-01 00:00:00",
     end_time=None,
 )
+
+# TODO: Should I ignore these w/ a preprocessor? or store as a property?
+# bad_assignment_ids = [407610653, 1147927607, 1407437764]
+# if Cols.AssignmentID in main_table.columns:
+#     main_table = main_table[~main_table[Cols.AssignmentID].isin(bad_assignment_ids)]
+
+# if "X-ClassID" in main_table.columns:
+#     class_counts = main_table["X-ClassID"].value_counts()
+#     print(class_counts)
+#     min_count = 1000
+#     invalid_class_ids = class_counts[class_counts < min_count].index
+#     print(f"Removing classes with less than {min_count} submissions: {invalid_class_ids}")
+#     main_table = main_table[~main_table["X-ClassID"].isin(invalid_class_ids) & ~main_table["X-ClassID"].isna()]
