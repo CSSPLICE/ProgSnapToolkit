@@ -5,40 +5,46 @@ from database.codestate.git_codestate_writer import GitCodeStateWriter
 from database.codestate.directory_codestate_writer import DirectoryCodeStateWriter
 from database.codestate.table_codestate_writer import CSVTableCodeStateWriter, SQLTableCodeStateWriter
 
-from sqlalchemy import Connection, create_engine
+from sqlalchemy import Connection, create_engine, inspect
 from database.config import PS2DataConfig, PS2DataWriteConfig
 from database.reader.csv_reader import CSVReader
 from database.reader.sql_reader import SQLReader
 from database.sql_context import IOContext
-from database.sql_table_manager import SQLTableManager
+from database.sql_table_manager import SQLReaderTableManager, SQLWriterTableManager
 from database.writer.sql_writer import SQLContext, SQLWriter
 from spec.enums import CodeStateRepresentation
 from spec.spec_definition import PS2Versions, ProgSnap2Spec
 
 # TODO: Rename this file
+# Also, long-term, this should probably be split into two classes,
+# one for reading and one for writing. There's just no use case for
+# doing both at once and the code is becoming too conditional.
 
 class IOFactory(ABC):
     def __init__(self, db_config: PS2DataConfig, ps2_spec: ProgSnap2Spec = None):
         self.db_config = db_config
 
         # Temporary PS2 spec and CSR to load metadata
-        self.ps2_spec = PS2Versions.load_default()
+        self.ps2_spec = PS2Versions.load_default() if ps2_spec is None else ps2_spec
         self.codestate_representation = CodeStateRepresentation.Table
 
+    # Must be called after child initialization
+    # TODO: Maybe init should be an abstract method? Call it then then?
+    def load_metadata_and_spec(self, ps2_spec: ProgSnap2Spec):
+        db_config = self.db_config
         if db_config.metadata is None:
             with self.create_reader() as reader:
-                self.db_config.metadata = reader.get_metadata_values()
+                db_config.metadata = reader.get_metadata_values()
 
-        self.codestate_representation = self.db_config.metadata.CodeStateRepresentation
+        self.codestate_representation = db_config.metadata.CodeStateRepresentation
 
         if ps2_spec is None:
-            version = db_config.metadata.Version if db_config.metadata else None
+            version = db_config.metadata.Version
             if version is None:
-                ps2_spec = PS2Versions.load_default()
-                print("Warning: No PS2 version specified in metadata, using default version.")
+                print("Warning: No PS2 spec version found in metadata. Using default spec.")
+                self.ps2_spec = PS2Versions.load_default()
             else:
-                ps2_spec = PS2Versions.load_from_string(version)
-        self.ps2_spec = ps2_spec
+                self.ps2_spec = PS2Versions.load_from_string(version)
 
     @abstractmethod
     def create_writer(self) -> "SQLWriterContextManager | CSVIOContextManager":
@@ -71,20 +77,36 @@ class IOFactory(ABC):
 
 
 class SQLIOFactory(IOFactory):
-    def __init__(self, ps2_spec: ProgSnap2Spec, db_config: PS2DataConfig):
-        super().__init__(ps2_spec, db_config)
+    def __init__(self, db_config: PS2DataConfig, ps2_spec: ProgSnap2Spec):
+        super().__init__(db_config, ps2_spec)
+        url = db_config.sqlalchemy_url
+        if not url:
+            raise ValueError("SQLAlchemy URL is not set in the database configuration.")
+        if url.lower().startswith("sqlite://"):
+            file = url[10:]  # Remove 'sqlite://' prefix
+            if not os.path.exists(file):
+                raise FileNotFoundError(f"SQLite database file '{file}' does not exist.")
         self.engine = create_engine(db_config.sqlalchemy_url, echo=db_config.echo)
-        self.table_manager = SQLTableManager(ps2_spec, db_config)
+        try:
+            self.table_names = inspect(self.engine).get_table_names()
+        except Exception:
+            self.table_names = None
+        self.table_manager = None # Don't need/want this for reading
+        self.load_metadata_and_spec(ps2_spec)
 
     def create_writer(self) -> "SQLIOContextManager":
         # Create the root directory if it doesn't exist
         if not isinstance(self.db_config, PS2DataWriteConfig):
             raise ValueError("You must provide a PS2DataWriteConfig for writing.")
+        if self.table_manager is None:
+            self.table_manager = SQLWriterTableManager(self.ps2_spec, self.db_config)
         os.makedirs(self.db_config.root_path, exist_ok=True)
-        return SQLWriterContextManager(self, False)
+        return SQLWriterContextManager(self)
 
     def create_reader(self):
-        return SQLReaderContextManager(self, True)
+        if self.table_manager is None:
+            self.table_manager = SQLReaderTableManager(self.engine)
+        return SQLReaderContextManager(self)
 
 # Use a context manager to handle the connection lifecycle
 class SQLIOContextManager(ABC):
@@ -92,21 +114,12 @@ class SQLIOContextManager(ABC):
         self.factory = factory
         self.conn = None
 
+    @abstractmethod
     def __enter__(self):
-        self.conn = self.factory.engine.connect()
-        context = SQLContext(
-            conn=self.conn,
-            table_manager=self.factory.table_manager,
-            data_config=self.factory.db_config,
-            ps2_spec=self.factory.ps2_spec
-        )
-        codestate_io = self.factory._create_codestate_writer(self.factory.db_config, context)
-        if self.reader:
-            return SQLReader(context, codestate_io)
-        else:
-            return SQLWriter(context, codestate_io)
+        pass
 
     def _get_context_and_codestate_io(self):
+        self.conn = self.factory.engine.connect()
         context = SQLContext(
             conn=self.conn,
             table_manager=self.factory.table_manager,
@@ -141,6 +154,7 @@ class SQLWriterContextManager(SQLIOContextManager):
 class CSVIOFactory(IOFactory):
     def __init__(self, ps2_spec: ProgSnap2Spec, db_config: PS2DataConfig):
         super().__init__(ps2_spec, db_config)
+        self.load_metadata_and_spec(ps2_spec)
 
     def create_writer(self) -> "CSVIOContextManager":
         raise NotImplementedError("CSV writer not implemented.")

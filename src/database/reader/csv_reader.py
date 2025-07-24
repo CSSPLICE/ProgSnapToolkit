@@ -15,14 +15,23 @@ class CSVReader(PS2Reader):
     def data_config(self):
         return self.context.data_config
 
-    def _get_table(self, path: str) -> DataFrame:
+    def _confirm_file_exists(self, path: str):
         if not os.path.exists(path):
             raise FileNotFoundError(f"No CSV file found at '{path}'.")
+
+    def _get_table(self, path: str) -> DataFrame:
+        self._confirm_file_exists(path)
         return pd.read_csv(path)
 
     def get_main_table(self) -> DataFrame:
         path = os.path.join(self.data_config.main_table_path)
         return self._get_table(path)
+
+    def get_main_table_head(self, n_rows = 5):
+        path = self.data_config.main_table_path
+        self._confirm_file_exists(path)
+        return pd.read_csv(path, nrows=n_rows)
+
 
     def add_codestate(self, codestate_id: str, subject_id: str, project_id: str) -> CodeStateEntry:
         pass

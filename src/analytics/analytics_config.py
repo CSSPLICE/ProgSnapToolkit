@@ -1,8 +1,12 @@
 
 from dataclasses import dataclass, field
-from analytics.ps2_dataset import LinkTablePreprocessor, Preprocessor
+from typing import Callable, Protocol
+from analytics.ps2_dataset import LinkTablePreprocessor, PS2Dataset, Preprocessor
+from database.config import PS2DataConfig
 from spec.enums import MainTableColumns as Cols, EventType
 from enum import Enum
+
+from spec.spec_definition import PS2Versions, ProgSnap2Spec
 
 class Granularity(Enum):
     """Granularity of collected data.
@@ -43,6 +47,7 @@ class Granularity(Enum):
 @dataclass
 class AnalyticsConfig:
     name: str
+    """A name for the dataset for convenience."""
 
     granularity: Granularity
     """The granularity of the events in this dataset."""
@@ -93,4 +98,22 @@ class AnalyticsConfig:
     usually between 20% and 40% of the dataset, splitting assignments
     and problems as cleanly as possible.
     """
+
+    create_data_config: Callable[[str], PS2DataConfig] = None
+    """A function that creates a PS2DataConfig object for the dataset."""
+
+    def load(self, root_path: str, spec=None) -> PS2Dataset:
+        """
+        Loads the dataset using the specified root path and spec.
+        """
+        if self.create_data_config is None:
+            raise ValueError("No loader function specified in AnalyticsConfig.")
+        spec = PS2Versions.v1_0.load() if spec is None else spec
+        data_config = self.create_data_config(root_path)
+        dataset = PS2Dataset(spec, data_config)
+        for i, step in enumerate(self.main_table_preprocessors):
+            dataset.main_table_preprocessors.insert(i, step)
+        for i, step in enumerate(self.link_table_preprocessors):
+            dataset.link_table_preprocessors.insert(i, step)
+        return dataset
 

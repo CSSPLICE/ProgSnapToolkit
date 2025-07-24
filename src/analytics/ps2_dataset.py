@@ -82,6 +82,20 @@ class PS2Dataset:
             self._main_table = preprocessor.apply(self, self._main_table)
         return self._main_table.copy()
 
+    def get_main_table_head(self, n_rows: int = 5) -> DataFrame:
+        """ Returns the first `n_rows` of the main table.
+        This is useful for quickly inspecting the dataset without
+        loading the entire table into memory.
+        Rows are loaded in the order they appear in the main table.
+        """
+        if self._main_table is not None:
+            return self.get_main_table().head(n_rows)
+        with self.factory.create_reader() as reader:
+            head = reader.get_main_table_head(n_rows)
+        for preprocessor in self.main_table_preprocessors:
+            head = preprocessor.apply(self, head)
+        return head
+
     def get_link_table(self, table_name: str) -> DataFrame:
         """
         Returns the link table as a DataFrame.

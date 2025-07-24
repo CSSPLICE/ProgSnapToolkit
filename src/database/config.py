@@ -20,18 +20,17 @@ class PS2DataConfig(BaseModel):
     metadata: object = None
     """Metadata for the dataset. If None, it will be loaded from the metadata file."""
 
+    metadata_table_name: str = "DatasetMetadata"
+    """Name of the metadata table (without an extension)."""
+
     # Config for CSV format
     main_table_file: str = None
     """Relative path to the main table CSV file."""
     codestates_table_relative_path: str = "CodeStates.csv"
     """Relative path to the CodeStates table CSV file."""
-    metadata_file: str = "DatasetMetadata.csv"
-    """Relative path to the metadata CSV file."""
 
     # Config for SQL/SQLite format
     sqlalchemy_url: str = None
-    short_str_length: int = 255
-    path_str_length: int = 2048
     echo: bool = False
 
     @property
@@ -48,7 +47,10 @@ class PS2DataConfig(BaseModel):
 
     @property
     def metadata_path(self) -> str:
-        return os.path.join(self.root_path, self.metadata_file)
+        file = self.metadata_table_name
+        if not file.lower().endswith('.csv'):
+            file += '.csv'
+        return os.path.join(self.root_path, file)
 
     @property
     def main_table_path(self) -> str:
@@ -88,12 +90,13 @@ class PS2DataConfig(BaseModel):
 
 class PS2DataWriteConfig(PS2DataConfig):
 
-    # TODO: This also doesn't really make sense for reading
     optimize_codestate_ids: bool
     """If true, provided CodeStateIDs are assumed to be local
     to each logging call and will be regenerated to be globally
     unique. If false, the provided CodeStateIDs are used directly.
     """
 
-    # TODO: Nor does this
     codestates_have_sections: bool = True
+
+    short_str_length: int = 255
+    path_str_length: int = 2048

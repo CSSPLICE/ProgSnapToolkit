@@ -6,22 +6,19 @@ from database.sql_context import SQLContext
 import pandas as pd
 from pandas import DataFrame
 
-from database.sql_table_manager import SQLTableManager
+from database.sql_table_manager import SQLWriterTableManager
 from spec.codestate import CodeStateEntry
 from spec.enums import CoreTables, MainTableColumns as Cols
 
 from sqlalchemy import text
-from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 
 class SQLReader(PS2Reader):
 
     def __init__(self, context: SQLContext, codestate_io: CodeStateWriter):
         super().__init__(context, codestate_io)
-
-    @property
-    def table_manager(self) -> SQLTableManager:
-        return self.context.table_manager
+        self.table_names = context.table_manager.table_names
 
     def _get_table(self, table_name: str) -> DataFrame:
         return pd.read_sql_table(
@@ -29,27 +26,26 @@ class SQLReader(PS2Reader):
             self.context.conn,
         )
 
-    def add_codestate(self, codestate_id: str, subject_id: str, project_id: str) -> CodeStateEntry:
-        # TODO: Now sure how I want to do this yet.
-        pass
-
     def get_main_table(self) -> DataFrame:
         return self._get_table(CoreTables.MainTable)
 
+    def get_main_table_head(self, n_rows = 5):
+        main_table = self.context.table_manager.get_table(CoreTables.MainTable)
+        statement = select(main_table).limit(n_rows)
+        return pd.read_sql(statement, self.context.conn)
+
     def get_metadata_table(self):
-        # TODO: THe docs actually say it should be DatasetMetadata
-        # so this enum may need to be updated. There's also no way to
-        # configure it right now...
-        return self._get_table(CoreTables.Metadata)
+        return self._get_table(self.context.data_config.metadata_table_name)
 
     def get_link_table(self, table_name):
-        if table_name not in self.table_manager.link_tables:
+        if table_name not in self.table_names:
             raise ValueError(f"Table {table_name} does not exist in the database.")
 
         return self._get_table(table_name)
 
     def get_link_table_names(self):
-        return self.table_manager.link_tables.keys()
+        core_tables = [CoreTables.MainTable, CoreTables.Metadata, CoreTables.CodeStates]
+        return [name for name in self.table_names if name not in core_tables]
 
     def get_codestates_table(self):
         return self._get_table(CoreTables.CodeStates)
@@ -69,7 +65,7 @@ class SQLReader(PS2Reader):
         # Join the temporary table with CodeStateIDs to fetch with
         # the CodeStates table.
         return pd.read_sql(f"""
-            SELECT *
+            SELECT cs.*
             FROM {CoreTables.CodeStates} cs
             JOIN temp_ids temp ON cs.{Cols.CodeStateID} = temp.{Cols.CodeStateID}
         """, self.context.conn)

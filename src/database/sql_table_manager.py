@@ -1,10 +1,11 @@
 
-from database.config import PS2DataConfig
+from abc import ABC, abstractmethod
+from database.config import PS2DataConfig, PS2DataWriteConfig
 from spec.enums import CodeStateRepresentation
 from spec.spec_definition import ProgSnap2Spec
 
 from datetime import datetime
-from sqlalchemy import Connection, Index, MetaData, Table, Column as SQLColumn, Integer, String, Float, Enum as SQLEnum, UniqueConstraint, inspect
+from sqlalchemy import Connection, Engine, Index, MetaData, Table, Column as SQLColumn, Integer, String, Float, Enum as SQLEnum, UniqueConstraint, inspect
 from sqlalchemy.dialects.sqlite import DATETIME
 
 from spec.datatypes import DBStringLength, PS2Datatype
@@ -12,11 +13,28 @@ from spec.spec_definition import ProgSnap2Spec, Property, Requirement, Column as
 from spec.enums import CodeStatesTableColumns as CodeCols, MainTableColumns as Cols, CoreTables
 
 from sqlalchemy import Text, String, Integer, Float, Boolean
-from sqlalchemy.dialects.sqlite import DATETIME
+
+class SQLTableManager(ABC):
+
+    def __init__(self, metadata: MetaData):
+        self._metadata = metadata
+        self.table_names = self._metadata.tables.keys()
+
+    def get_table(self, table_name: str) -> Table:
+        if table_name not in self.table_names:
+            raise ValueError(f"Table {table_name} does not exist in the database.")
+        return self._metadata.tables[table_name]
+
+class SQLReaderTableManager(SQLTableManager):
+    def __init__(self, engine: Engine):
+        metadata = MetaData()
+        metadata.reflect(bind=engine)
+        super().__init__(metadata)
+        self.engine = engine
 
 
-class SQLTableManager:
-    def __init__(self, spec: ProgSnap2Spec, db_config: PS2DataConfig):
+class SQLWriterTableManager(SQLTableManager):
+    def __init__(self, spec: ProgSnap2Spec, db_config: PS2DataWriteConfig):
         self.metadata_values = db_config.metadata
         self.spec = spec
         self.db_config = db_config
@@ -131,7 +149,6 @@ class SQLTableManager:
             cols_etc = [
                 SQLColumn(CodeCols.CodeStateID, id_datatype, nullable=False),
             ]
-            # Requires a write config, but worst case it just defaults to None/false here
             if self.db_config.codestates_have_sections:
                 cols_etc.append(SQLColumn(CodeCols.CodeStateSection, path_datatype, nullable=True))
             cols_etc.extend([

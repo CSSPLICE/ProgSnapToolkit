@@ -3,7 +3,7 @@ from sqlalchemy import insert
 from database.codestate.codestate_writer import ContextualCodeStateEntry, CodeStateWriter
 from database.config import PS2DataWriteConfig
 from database.sql_context import IOContext, SQLContext
-from spec.enums import CodeStatesTableColumns as Cols
+from spec.enums import CodeStatesTableColumns as Cols, CoreTables
 import os
 
 class CSVTableCodeStateWriter(CodeStateWriter):
@@ -72,7 +72,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
     def __init__(self, context: SQLContext):
         super().__init__()
         self.conn = context.conn
-        self.table = context.table_manager.codestates_table
+        self.table = context.table_manager.get_table(CoreTables.CodeStates)
 
     def add_codestate_and_get_id(self, codestate: ContextualCodeStateEntry) -> str:
         codestate_id = self.get_codestate_id_from_hash(codestate)

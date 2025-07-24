@@ -18,7 +18,7 @@ class PS2Reader(ABC):
         pass
 
     @abstractmethod
-    def add_codestate(self, codestate_id: str, subject_id: str, project_id: str) -> CodeStateEntry:
+    def get_main_table_head(self, n_rows: int = 5) -> DataFrame:
         pass
 
     @abstractmethod
@@ -47,7 +47,7 @@ class PS2Reader(ABC):
         """
         metadata_table = None
         try:
-            self.get_metadata_table()
+            metadata_table = self.get_metadata_table()
         except Exception:
             pass
         if metadata_table is None or metadata_table.empty:
