@@ -1,8 +1,11 @@
 
 from dataclasses import dataclass, field
-from analytics.ps2_dataset import LinkTablePreprocessor, Preprocessor
+from typing import Callable, Protocol
+from analytics.ps2_dataset import LinkTablePreprocessor, PS2Dataset, Preprocessor
 from spec.enums import MainTableColumns as Cols, EventType
 from enum import Enum
+
+from spec.spec_definition import ProgSnap2Spec
 
 class Granularity(Enum):
     """Granularity of collected data.
@@ -43,6 +46,8 @@ class Granularity(Enum):
 @dataclass
 class AnalyticsConfig:
     name: str
+
+    loader: Callable[[str, "AnalyticsConfig", ProgSnap2Spec], PS2Dataset]
 
     granularity: Granularity
     """The granularity of the events in this dataset."""
@@ -94,3 +99,10 @@ class AnalyticsConfig:
     and problems as cleanly as possible.
     """
 
+    def load(self, root_path: str, spec=None) -> PS2Dataset:
+        """
+        Loads the dataset using the specified root path and spec.
+        """
+        if self.loader is None:
+            raise ValueError("No loader function specified in AnalyticsConfig.")
+        return self.loader(root_path, self, spec)
