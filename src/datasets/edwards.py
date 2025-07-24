@@ -1,4 +1,4 @@
-from analytics.dataset_config import AnalyticsConfig, Granularity
+from analytics.analytics_config import AnalyticsConfig, Granularity
 from analytics.preprocessors.edwards import ClassSubsetPreprocessor, TimeStampToDateTimePreprocessor
 from spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace

@@ -50,12 +50,20 @@ class AnalyticsConfig:
     primary_timestamp_column: str
     """The most reliable timestamp columns to use in analysis."""
     primary_problem_grouping_column: str = Cols.ProblemID
-    """The most fine-grained problem grouping column to use in analysis (ProblemID or AssignmentID)."""
+    """The most fine-grained problem grouping column to use in analysis (ProblemID or AssignmentID).
+    Note: ProblemID will be automatically added to the main table if it is missing, so it
+    should typically be safe to use, but this information is provided for clarity.
+    """
 
     main_table_preprocessors: list[Preprocessor] = field(default_factory=list)
     """A list of Preprocessors to apply to the main table before analysis."""
     link_table_preprocessors: list[LinkTablePreprocessor]  = field(default_factory=list)
     """A list of LinkTablePreprocessors to apply to link tables before analysis."""
+
+    attempt_grouping_columns: list[str] = field(default_factory=lambda: [Cols.SubjectID, Cols.AssignmentID, Cols.ProblemID])
+    """A list of columns that should be used to group one student working on one problem in one classroom.
+    Defaults to [SubjectID, AssignmentID, ProblemID], but may need additional columns.
+    """
 
     submit_event: str = EventType.Submit
     """Event that best resembles a "submission," even if Submissions are not directly logged."""

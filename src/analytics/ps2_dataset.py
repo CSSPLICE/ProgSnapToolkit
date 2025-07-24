@@ -54,6 +54,7 @@ class PS2Dataset:
         self.metadata_values = self.factory.db_config.metadata
         self.main_table_preprocessors = [
             # SortPreprocessor(), # Can be quite expensive, so disabled by default
+            AddProblemIDPreprocessor(),
             TimePreprocessor(),
         ]
         self.link_table_preprocessors = []
@@ -196,3 +197,17 @@ class FilterPreprocessor(Preprocessor):
         Filters the DataFrame to keep only the specified columns.
         """
         return main_table[main_table[self.filter_column] == self.filter_value].copy()
+
+class AddProblemIDPreprocessor(Preprocessor):
+    """
+    Preprocessor that adds a ProblemID column to the DataFrame if it is
+    missing and the AssignmentID column is present.
+    """
+
+    def apply(self, dataset: PS2Dataset, main_table: DataFrame) -> DataFrame:
+        """
+        Adds a ProblemID column to the DataFrame.
+        """
+        if Cols.ProblemID not in main_table.columns and Cols.AssignmentID in main_table.columns:
+            main_table[Cols.ProblemID] = main_table[Cols.AssignmentID]
+        return main_table
