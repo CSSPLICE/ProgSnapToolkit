@@ -1,4 +1,4 @@
-from analytics.analytics_config import AnalyticsConfig, Granularity
+from analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
 from database.config import PS2DataConfig
 from spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace
@@ -13,6 +13,7 @@ _base_name = "cs1eng"
 
 _base_config = AnalyticsConfig(
     name=_base_name,
+    programming_language=ProgrammingLanguage.Python,
     granularity=Granularity.Edit,
 
     primary_timestamp_column=Cols.ServerTimestamp,

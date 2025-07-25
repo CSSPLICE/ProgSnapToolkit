@@ -44,6 +44,23 @@ class Granularity(Enum):
     def __str__(self):
         return self.value
 
+class ProgrammingLanguage(str, Enum):
+    """Some common programming languages used in datasets,
+    just to keep naming consistent."""
+
+    Python = "Python"
+    Java = "Java"
+    Cpp = "C++"
+    C = "C"
+    JavaScript = "JavaScript"
+    Ruby = "Ruby"
+    Kotlin = "Kotlin"
+    Go = "Go"
+    Rust = "Rust"
+
+    def __str__(self):
+        return self.value
+
 @dataclass
 class AnalyticsConfig:
     name: str
@@ -51,6 +68,9 @@ class AnalyticsConfig:
 
     granularity: Granularity
     """The granularity of the events in this dataset."""
+
+    programming_language: str
+    """The programming language used in the dataset, e.g. "Python", "Java"."""
 
     primary_timestamp_column: str
     """The most reliable timestamp columns to use in analysis."""

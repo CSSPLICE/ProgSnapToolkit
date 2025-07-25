@@ -1,6 +1,6 @@
 import re
 import pandas as pd
-from analytics.analytics_config import AnalyticsConfig, Granularity
+from analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
 
 from analytics.ps2_dataset import LinkTablePreprocessor, PS2Dataset, Preprocessor, SortPreprocessor
 from database.config import PS2DataConfig
@@ -56,6 +56,7 @@ _base_name = "codeworkout"
 _base_config = AnalyticsConfig(
     name=_base_name,
     create_data_config=_create_data_config,
+    programming_language=ProgrammingLanguage.Java,
 
     granularity=Granularity.Submission,
 
