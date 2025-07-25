@@ -66,6 +66,8 @@ class AnalyticsConfig:
     name: str
     """A name for the dataset for convenience."""
 
+    loader: Callable[[str, "AnalyticsConfig", ProgSnap2Spec], PS2Dataset]
+
     granularity: Granularity
     """The granularity of the events in this dataset."""
 
