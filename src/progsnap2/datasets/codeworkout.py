@@ -83,4 +83,5 @@ S19 = replace(_base_config,
 
 F19 = replace(_base_config,
     name=f"{_base_name}_f19",
+    early_time="2019-10-14 00:00:00",
 )

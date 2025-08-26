@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 import pytest
-from spec.event_validator import ErrorType, EventValidator
-from api.events import DataModelGenerator
-from spec.spec_definition import ProgSnap2Spec
-from spec.enums import EventType, MainTableColumns as Cols
+from progsnap2.spec.event_validator import ErrorType, EventValidator
+from progsnap2.api.events import DataModelGenerator
+from progsnap2.spec.spec_definition import ProgSnap2Spec
+from progsnap2.spec.enums import EventType, MainTableColumns as Cols
 from ..conftest import SpecConfig
 
 def create_valid_event(config: SpecConfig):

@@ -1,7 +1,7 @@
 
 
 import os
-from spec.gen.gen_docs import render_main_table_columns, render_metadata_section, render_property, render_spec
+from progsnap2.spec.gen.gen_docs import render_main_table_columns, render_metadata_section, render_property, render_spec
 
 
 def test_doc_generator(config):

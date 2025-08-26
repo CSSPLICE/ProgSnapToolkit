@@ -1,9 +1,9 @@
 
 
 import sqlite3
-from database.helper.event_state import EventState
-from database.helper.event_writer import CODESTATE, EventWriterBase
-from spec.enums import EventType, MainTableColumns as Cols, CodeStatesTableColumns as CodeCols
+from progsnap2.database.helper.event_state import EventState
+from progsnap2.database.helper.event_writer import CODESTATE, EventWriterBase
+from progsnap2.spec.enums import EventType, MainTableColumns as Cols, CodeStatesTableColumns as CodeCols
 from tests.database.conftest import cleanup_temp_dir
 
 def test_event_writer_one_event(sqlite_writer_factory):

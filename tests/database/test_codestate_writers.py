@@ -79,8 +79,8 @@ def do_test_git_codestate_writer(with_subject_id):
 
 
 def test_csv_table_codestate_writer(csv_config):
-    from database.codestate.table_codestate_writer import CSVTableCodeStateWriter
-    from database.sql_context import IOContext
+    from progsnap2.database.codestate.table_codestate_writer import CSVTableCodeStateWriter
+    from progsnap2.database.sql_context import IOContext
 
     # Initialize the DirectoryTableWriter
     writer = CSVTableCodeStateWriter(csv_config)

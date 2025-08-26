@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 import pytest
-from api.events import DataModelGenerator
-from spec.spec_definition import ProgSnap2Spec, PS2Versions
+from progsnap2.api.events import DataModelGenerator
+from progsnap2.spec.spec_definition import ProgSnap2Spec, PS2Versions
 
 @dataclass
 class SpecConfig:

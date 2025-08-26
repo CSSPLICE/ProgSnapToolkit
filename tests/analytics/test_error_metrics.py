@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from itertools import pairwise
-from analytics.metrics.errors import ErrorMetrics
+from progsnap2.analytics.metrics.errors import ErrorMetrics
 
 @dataclass
 class ErrorTestData:

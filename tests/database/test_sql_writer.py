@@ -3,15 +3,15 @@ import os
 import pytest
 import sqlite3
 
-from database.codestate.git_codestate_writer import GitCodeStateWriter
-from database.writer.db_writer import LogResult
-from database.writer.db_writer_factory import SQLIOFactory
-from database.writer.sql_writer import SQLWriter
-from spec.codestate import CodeStateEntry
+from progsnap2.database.codestate.git_codestate_writer import GitCodeStateWriter
+from progsnap2.database.writer.db_writer import LogResult
+from progsnap2.database.writer.db_writer_factory import SQLIOFactory
+from progsnap2.database.writer.sql_writer import SQLWriter
+from progsnap2.spec.codestate import CodeStateEntry
 from .conftest import cleanup_temp_dir
 from .test_codestate_writers import CodestateGenerator
 from .test_event_validator import create_valid_event
-from spec.enums import MainTableColumns as MTC, EventType
+from progsnap2.spec.enums import MainTableColumns as MTC, EventType
 
 def test_sqlite_writer_init(sqlite_writer_factory, sqlite_config):
     with sqlite_writer_factory.create_writer() as writer:

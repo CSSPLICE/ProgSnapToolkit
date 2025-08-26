@@ -2,9 +2,9 @@
 import os
 import pytest
 
-from database.config import PS2DataWriteConfig
-from database.writer.db_writer_factory import SQLIOFactory
-from spec.spec_definition import PS2Versions, ProgSnap2Spec
+from progsnap2.database.config import PS2DataWriteConfig
+from progsnap2.database.writer.db_writer_factory import SQLIOFactory
+from progsnap2.spec.spec_definition import PS2Versions, ProgSnap2Spec
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
