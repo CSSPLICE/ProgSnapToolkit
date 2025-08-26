@@ -1,6 +1,6 @@
-from analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
-from database.config import PS2DataConfig
-from spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
+from progsnap2.database.config import PS2DataConfig
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace
 
 def _create_data_config(root_path: str, name: str):

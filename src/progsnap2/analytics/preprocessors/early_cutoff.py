@@ -1,4 +1,4 @@
-from spec.enums import MainTableColumns as Cols
+from progsnap2.spec.enums import MainTableColumns as Cols
 import matplotlib.pyplot as plt
 
 def filter_before_time(main_table, time_cutoff, timestamp_col, filter_problems=True, verbose=True):

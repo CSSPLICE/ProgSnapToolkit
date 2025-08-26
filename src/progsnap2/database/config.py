@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, create_model, model_validator
 import yaml
 
-from spec.spec_definition import Metadata, ProgSnap2Spec
+from progsnap2.spec.spec_definition import Metadata, ProgSnap2Spec
 
 def create_metadata_values_model(metadata_spec: Metadata) -> type[BaseModel]:
     fields = {}

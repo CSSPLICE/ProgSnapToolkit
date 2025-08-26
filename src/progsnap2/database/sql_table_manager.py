@@ -1,16 +1,16 @@
 
 from abc import ABC, abstractmethod
-from database.config import PS2DataConfig, PS2DataWriteConfig
-from spec.enums import CodeStateRepresentation
-from spec.spec_definition import ProgSnap2Spec
+from progsnap2.database.config import PS2DataConfig, PS2DataWriteConfig
+from progsnap2.spec.enums import CodeStateRepresentation
+from progsnap2.spec.spec_definition import ProgSnap2Spec
 
 from datetime import datetime
 from sqlalchemy import Connection, Engine, Index, MetaData, Table, Column as SQLColumn, Integer, String, Float, Enum as SQLEnum, UniqueConstraint, inspect
 from sqlalchemy.dialects.sqlite import DATETIME
 
-from spec.datatypes import DBStringLength, PS2Datatype
-from spec.spec_definition import ProgSnap2Spec, Property, Requirement, Column as SpecColumn
-from spec.enums import CodeStatesTableColumns as CodeCols, MainTableColumns as Cols, CoreTables
+from progsnap2.spec.datatypes import DBStringLength, PS2Datatype
+from progsnap2.spec.spec_definition import ProgSnap2Spec, Property, Requirement, Column as SpecColumn
+from progsnap2.spec.enums import CodeStatesTableColumns as CodeCols, MainTableColumns as Cols, CoreTables
 
 from sqlalchemy import Text, String, Integer, Float, Boolean
 

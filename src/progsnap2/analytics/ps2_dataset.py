@@ -8,11 +8,11 @@ import pandas as pd
 from abc import ABC, abstractmethod
 from pandas import DataFrame
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
-from database.config import PS2DataConfig
-from database.writer.db_writer_factory import IOFactory
-from spec.enums import MainTableColumns as Cols, MetadataProperties as MetadataProps, EventOrderScope
-from spec.spec_definition import ProgSnap2Spec
-from spec import datatypes
+from progsnap2.database.config import PS2DataConfig
+from progsnap2.database.writer.db_writer_factory import IOFactory
+from progsnap2.spec.enums import MainTableColumns as Cols, MetadataProperties as MetadataProps, EventOrderScope
+from progsnap2.spec.spec_definition import ProgSnap2Spec
+from progsnap2.spec import datatypes
 
 class Preprocessor(ABC):
     """

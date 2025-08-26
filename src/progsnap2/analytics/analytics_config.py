@@ -1,12 +1,12 @@
 
 from dataclasses import dataclass, field
 from typing import Callable, Protocol
-from analytics.ps2_dataset import LinkTablePreprocessor, PS2Dataset, Preprocessor
-from database.config import PS2DataConfig
-from spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.analytics.ps2_dataset import LinkTablePreprocessor, PS2Dataset, Preprocessor
+from progsnap2.database.config import PS2DataConfig
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 from enum import Enum
 
-from spec.spec_definition import PS2Versions, ProgSnap2Spec
+from progsnap2.spec.spec_definition import PS2Versions, ProgSnap2Spec
 
 class Granularity(Enum):
     """Granularity of collected data.

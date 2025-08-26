@@ -1,6 +1,6 @@
-from analytics.analytics_config import AnalyticsConfig, Granularity
-from analytics.preprocessors.codebench import CodeBenchAddParentEventIDs, YAMLLinkURLPreprocessor
-from spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity
+from progsnap2.analytics.preprocessors.codebench import CodeBenchAddParentEventIDs, YAMLLinkURLPreprocessor
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace
 
 _base_name = "codebench"

@@ -2,10 +2,10 @@
 from dataclasses import dataclass, field
 from sqlalchemy import Connection, MetaData
 
-from database.config import PS2DataConfig
-from database.sql_table_manager import SQLTableManager, SQLWriterTableManager
-from spec.event_validator import EventValidator
-from spec.spec_definition import ProgSnap2Spec
+from progsnap2.database.config import PS2DataConfig
+from progsnap2.database.sql_table_manager import SQLTableManager, SQLWriterTableManager
+from progsnap2.spec.event_validator import EventValidator
+from progsnap2.spec.spec_definition import ProgSnap2Spec
 
 @dataclass
 class IOContext:

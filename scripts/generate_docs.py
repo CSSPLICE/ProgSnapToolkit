@@ -4,8 +4,8 @@ root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 src_path = os.path.join(root_path, "src")
 sys.path.insert(0, src_path)
 
-from spec.gen.gen_docs import render_spec
-from spec.spec_definition import PS2Versions
+from progsnap2.spec.gen.gen_docs import render_spec
+from progsnap2.spec.spec_definition import PS2Versions
 
 docs_path = os.path.join(root_path, "docs", "specs")
 

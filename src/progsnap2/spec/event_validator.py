@@ -1,10 +1,10 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from spec.datatypes import timestamp_has_timezone
-from api.events import MainTableEventBase
-from spec.spec_definition import ProgSnap2Spec, Requirement
-from spec.enums import MainTableColumns as Cols
+from progsnap2.spec.datatypes import timestamp_has_timezone
+from progsnap2.api.events import MainTableEventBase
+from progsnap2.spec.spec_definition import ProgSnap2Spec, Requirement
+from progsnap2.spec.enums import MainTableColumns as Cols
 
 class ErrorType(Enum):
     MissingRequiredColumn = "MissingRequiredColumn"

@@ -1,7 +1,7 @@
 
 from pandas import DataFrame
-from analytics.metrics.drafts.metric import Metric
-from spec.enums import MainTableColumns as Cols
+from progsnap2.analytics.metrics.drafts.metric import Metric
+from progsnap2.spec.enums import MainTableColumns as Cols
 
 CORRECT_SCORE = 1
 

@@ -3,8 +3,8 @@
 import yaml
 from pydantic import BaseModel, create_model
 
-from database.config import PS2DataWriteConfig
-from spec.spec_definition import ProgSnap2Spec
+from progsnap2.database.config import PS2DataWriteConfig
+from progsnap2.spec.spec_definition import ProgSnap2Spec
 
 
 class CORSConfig(BaseModel):

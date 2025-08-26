@@ -1,12 +1,12 @@
 import re
 import pandas as pd
-from analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
+from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
 
-from analytics.ps2_dataset import LinkTablePreprocessor, PS2Dataset, Preprocessor, SortPreprocessor
-from database.config import PS2DataConfig
-from spec.enums import MainTableColumns as Cols, EventType
-from spec.metadata import MetadataValues
-from spec.spec_definition import PS2Versions
+from progsnap2.analytics.ps2_dataset import LinkTablePreprocessor, PS2Dataset, Preprocessor, SortPreprocessor
+from progsnap2.database.config import PS2DataConfig
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.spec.metadata import MetadataValues
+from progsnap2.spec.spec_definition import PS2Versions
 from dataclasses import replace
 
 class CodeWorkoutExtractErrorTypesPreprocessor(Preprocessor):

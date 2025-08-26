@@ -1,12 +1,12 @@
 
 from dataclasses import dataclass, fields
 import uuid
-from database.codestate.codestate_writer import ContextualCodeStateEntry
-from database.helper.event_state import EventState
-from database.writer.db_writer import LogResult
-from database.writer.sql_writer import SQLWriter
-from spec.codestate import CodeStateEntry
-from spec.enums import EventType, MainTableColumns as Cols
+from progsnap2.database.codestate.codestate_writer import ContextualCodeStateEntry
+from progsnap2.database.helper.event_state import EventState
+from progsnap2.database.writer.db_writer import LogResult
+from progsnap2.database.writer.sql_writer import SQLWriter
+from progsnap2.spec.codestate import CodeStateEntry
+from progsnap2.spec.enums import EventType, MainTableColumns as Cols
 
 CODESTATE = "CodeState"
 

@@ -1,6 +1,6 @@
 
 import os
-from database.codestate.codestate_writer import CodeStateWriter, ContextualCodeStateEntry
+from progsnap2.database.codestate.codestate_writer import CodeStateWriter, ContextualCodeStateEntry
 
 
 class DirectoryCodeStateWriter(CodeStateWriter):

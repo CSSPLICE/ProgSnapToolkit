@@ -1,8 +1,8 @@
-from analytics.ps2_dataset import Preprocessor
-from analytics.ps2_dataset import PS2Dataset
+from progsnap2.analytics.ps2_dataset import Preprocessor
+from progsnap2.analytics.ps2_dataset import PS2Dataset
 import pandas as pd
 from pandas import DataFrame
-from spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 import os
 
 class TimeStampToDateTimePreprocessor(Preprocessor):

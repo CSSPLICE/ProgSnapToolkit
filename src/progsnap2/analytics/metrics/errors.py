@@ -1,7 +1,7 @@
 
 from typing import Final, List, Set, Tuple
 from pandas import DataFrame, Series
-from spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 import numpy as np
 from itertools import pairwise
 

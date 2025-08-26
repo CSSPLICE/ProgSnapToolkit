@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import hashlib
 from typing import Optional
 
-from spec.codestate import CodeStateEntry, CodeStateSectionEntry
+from progsnap2.spec.codestate import CodeStateEntry, CodeStateSectionEntry
 
 
 class ContextualCodeStateEntry(CodeStateEntry):

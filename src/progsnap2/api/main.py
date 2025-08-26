@@ -7,14 +7,14 @@ from typing import List, Type
 
 from fastapi.responses import JSONResponse, PlainTextResponse
 
-from api.config import PS2APIConfig
-from api.models import TempCodeStateEntry
-from database.writer.sql_writer import SQLWriter
-from api.events import DataModelGenerator
-from database.writer.db_writer import DBWriter, LogResult
-from database.writer.db_writer_factory import IOFactory, SQLIOFactory
-from spec.spec_definition import PS2Versions, ProgSnap2Spec
-from spec.gen.gen_client import generate_ts_methods
+from progsnap2.api.config import PS2APIConfig
+from progsnap2.api.models import TempCodeStateEntry
+from progsnap2.database.writer.sql_writer import SQLWriter
+from progsnap2.api.events import DataModelGenerator
+from progsnap2.database.writer.db_writer import DBWriter, LogResult
+from progsnap2.database.writer.db_writer_factory import IOFactory, SQLIOFactory
+from progsnap2.spec.spec_definition import PS2Versions, ProgSnap2Spec
+from progsnap2.spec.gen.gen_client import generate_ts_methods
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(file_dir, "..")

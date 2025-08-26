@@ -1,9 +1,9 @@
 import csv
 from sqlalchemy import insert
-from database.codestate.codestate_writer import ContextualCodeStateEntry, CodeStateWriter
-from database.config import PS2DataWriteConfig
-from database.sql_context import IOContext, SQLContext
-from spec.enums import CodeStatesTableColumns as Cols, CoreTables
+from progsnap2.database.codestate.codestate_writer import ContextualCodeStateEntry, CodeStateWriter
+from progsnap2.database.config import PS2DataWriteConfig
+from progsnap2.database.sql_context import IOContext, SQLContext
+from progsnap2.spec.enums import CodeStatesTableColumns as Cols, CoreTables
 import os
 
 class CSVTableCodeStateWriter(CodeStateWriter):

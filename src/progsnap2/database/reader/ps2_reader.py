@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 
 from pandas import DataFrame
 
-from database.codestate.codestate_writer import CodeStateWriter
-from database.sql_context import IOContext
-from spec.codestate import CodeStateEntry
-from spec.metadata import MetadataValues
+from progsnap2.database.codestate.codestate_writer import CodeStateWriter
+from progsnap2.database.sql_context import IOContext
+from progsnap2.spec.codestate import CodeStateEntry
+from progsnap2.spec.metadata import MetadataValues
 
 class PS2Reader(ABC):
 

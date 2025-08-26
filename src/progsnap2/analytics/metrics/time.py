@@ -1,8 +1,8 @@
 
 from typing import Final
 from pandas import DataFrame, Series
-from analytics.ps2_dataset import PS2Dataset
-from spec.enums import MainTableColumns as Cols
+from progsnap2.analytics.ps2_dataset import PS2Dataset
+from progsnap2.spec.enums import MainTableColumns as Cols
 import numpy as np
 
 

@@ -1,14 +1,14 @@
 from pandas import DataFrame
-from database.codestate.codestate_writer import CodeStateWriter
-from database.reader.ps2_reader import PS2Reader
-from database.sql_context import SQLContext
+from progsnap2.database.codestate.codestate_writer import CodeStateWriter
+from progsnap2.database.reader.ps2_reader import PS2Reader
+from progsnap2.database.sql_context import SQLContext
 
 import pandas as pd
 from pandas import DataFrame
 
-from database.sql_table_manager import SQLWriterTableManager
-from spec.codestate import CodeStateEntry
-from spec.enums import CoreTables, MainTableColumns as Cols
+from progsnap2.database.sql_table_manager import SQLWriterTableManager
+from progsnap2.spec.codestate import CodeStateEntry
+from progsnap2.spec.enums import CoreTables, MainTableColumns as Cols
 
 from sqlalchemy import text
 from sqlalchemy import select

@@ -1,11 +1,11 @@
 import datetime
 from sqlalchemy import insert
-from database.codestate.codestate_writer import CodeStateEntry, CodeStateWriter, ContextualCodeStateEntry
-from database.writer.db_writer import DBWriter, LogResult
-from database.sql_context import SQLContext
-from spec.codestate import BLANK_CODESTATE_ID
-from spec.datatypes import get_current_timestamp
-from spec.enums import MainTableColumns as Cols
+from progsnap2.database.codestate.codestate_writer import CodeStateEntry, CodeStateWriter, ContextualCodeStateEntry
+from progsnap2.database.writer.db_writer import DBWriter, LogResult
+from progsnap2.database.sql_context import SQLContext
+from progsnap2.spec.codestate import BLANK_CODESTATE_ID
+from progsnap2.spec.datatypes import get_current_timestamp
+from progsnap2.spec.enums import MainTableColumns as Cols
 
 EventList = list[dict[str, any]]
 CodeStatesMap = dict[str, CodeStateEntry]

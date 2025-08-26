@@ -1,7 +1,7 @@
 from jinja2 import Template
 
-from spec.spec_definition import ProgSnap2Spec, Column
-from spec.datatypes import PS2Datatype
+from progsnap2.spec.spec_definition import ProgSnap2Spec, Column
+from progsnap2.spec.datatypes import PS2Datatype
 import textwrap
 
 def create_ts_template():

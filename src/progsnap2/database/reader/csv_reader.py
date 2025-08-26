@@ -1,9 +1,9 @@
 
 import pandas as pd
 from pandas import DataFrame
-from database.reader.ps2_reader import PS2Reader
-from spec.codestate import CodeStateEntry
-from spec.enums import CodeStatesTableColumns as Cols
+from progsnap2.database.reader.ps2_reader import PS2Reader
+from progsnap2.spec.codestate import CodeStateEntry
+from progsnap2.spec.enums import CodeStatesTableColumns as Cols
 import os
 
 

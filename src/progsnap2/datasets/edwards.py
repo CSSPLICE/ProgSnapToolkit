@@ -1,6 +1,6 @@
-from analytics.analytics_config import AnalyticsConfig, Granularity
-from analytics.preprocessors.edwards import ClassSubsetPreprocessor, TimeStampToDateTimePreprocessor
-from spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity
+from progsnap2.analytics.preprocessors.edwards import ClassSubsetPreprocessor, TimeStampToDateTimePreprocessor
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace
 
 _base_name = "edwards"

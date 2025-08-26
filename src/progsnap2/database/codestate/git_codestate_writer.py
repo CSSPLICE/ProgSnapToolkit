@@ -2,7 +2,7 @@ import os
 import shutil
 from git import Repo
 
-from database.codestate.codestate_writer import CodeStateWriter, ContextualCodeStateEntry
+from progsnap2.database.codestate.codestate_writer import CodeStateWriter, ContextualCodeStateEntry
 
 # TODO: Handle locking and other things?
 # This would probably require a fair bit of work, may be out of scope

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from spec.enums import EventType
+from progsnap2.spec.enums import EventType
 
 # TODO: Autogenerate with optional fields
 @dataclass

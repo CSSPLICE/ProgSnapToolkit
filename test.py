@@ -4,10 +4,10 @@ src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "src"))
 sys.path.insert(0, src_path)
 
 from sqlalchemy import create_engine
-from spec.gen.gen_client import generate_ts_methods
-from spec.gen.gen_enums import generate_enums_for_spec
-from spec.spec_definition import PS2Versions, ProgSnap2Spec
-from spec.enums import EventType
+from progsnap2.spec.gen.gen_client import generate_ts_methods
+from progsnap2.spec.gen.gen_enums import generate_enums_for_spec
+from progsnap2.spec.spec_definition import PS2Versions, ProgSnap2Spec
+from progsnap2.spec.enums import EventType
 
 if __name__ == "__main__":
     # Load schema

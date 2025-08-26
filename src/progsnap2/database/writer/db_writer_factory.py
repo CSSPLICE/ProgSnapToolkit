@@ -1,19 +1,19 @@
 
 from abc import ABC, abstractmethod
 import os
-from database.codestate.git_codestate_writer import GitCodeStateWriter
-from database.codestate.directory_codestate_writer import DirectoryCodeStateWriter
-from database.codestate.table_codestate_writer import CSVTableCodeStateWriter, SQLTableCodeStateWriter
+from progsnap2.database.codestate.git_codestate_writer import GitCodeStateWriter
+from progsnap2.database.codestate.directory_codestate_writer import DirectoryCodeStateWriter
+from progsnap2.database.codestate.table_codestate_writer import CSVTableCodeStateWriter, SQLTableCodeStateWriter
 
 from sqlalchemy import Connection, create_engine, inspect
-from database.config import PS2DataConfig, PS2DataWriteConfig
-from database.reader.csv_reader import CSVReader
-from database.reader.sql_reader import SQLReader
-from database.sql_context import IOContext
-from database.sql_table_manager import SQLReaderTableManager, SQLWriterTableManager
-from database.writer.sql_writer import SQLContext, SQLWriter
-from spec.enums import CodeStateRepresentation
-from spec.spec_definition import PS2Versions, ProgSnap2Spec
+from progsnap2.database.config import PS2DataConfig, PS2DataWriteConfig
+from progsnap2.database.reader.csv_reader import CSVReader
+from progsnap2.database.reader.sql_reader import SQLReader
+from progsnap2.database.sql_context import IOContext
+from progsnap2.database.sql_table_manager import SQLReaderTableManager, SQLWriterTableManager
+from progsnap2.database.writer.sql_writer import SQLContext, SQLWriter
+from progsnap2.spec.enums import CodeStateRepresentation
+from progsnap2.spec.spec_definition import PS2Versions, ProgSnap2Spec
 
 # TODO: Rename this file
 # Also, long-term, this should probably be split into two classes,

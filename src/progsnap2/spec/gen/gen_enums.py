@@ -1,5 +1,5 @@
 
-from spec.spec_definition import LinkTableSpec, ProgSnap2Spec, EnumType, Column
+from progsnap2.spec.spec_definition import LinkTableSpec, ProgSnap2Spec, EnumType, Column
 import keyword
 
 

@@ -1,9 +1,9 @@
 
 import os
 import copy
-from database.codestate.codestate_writer import CodeStateSectionEntry, ContextualCodeStateEntry
-from database.codestate.directory_codestate_writer import DirectoryCodeStateWriter
-from database.codestate.git_codestate_writer import GitCodeStateWriter
+from progsnap2.database.codestate.codestate_writer import CodeStateSectionEntry, ContextualCodeStateEntry
+from progsnap2.database.codestate.directory_codestate_writer import DirectoryCodeStateWriter
+from progsnap2.database.codestate.git_codestate_writer import GitCodeStateWriter
 from .conftest import TEMP_DIR, cleanup_temp_dir
 
 temp_dir = TEMP_DIR

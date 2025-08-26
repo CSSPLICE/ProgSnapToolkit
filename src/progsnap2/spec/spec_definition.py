@@ -5,7 +5,7 @@ from enum import Enum
 from importlib.resources import open_text
 import yaml
 
-from spec.datatypes import PS2Datatype
+from progsnap2.spec.datatypes import PS2Datatype
 
 # TODO: These should all probably be immutable
 class EnumValue(BaseModel):

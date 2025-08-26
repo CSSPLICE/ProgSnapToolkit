@@ -2,9 +2,9 @@
 
 from typing import List
 
-from spec.datatypes import PS2Datatype
-from spec.enums import MainTableColumns
-from spec.spec_definition import Column, EnumValue, MainTable, MetadataProperty, ProgSnap2Spec, Property, Requirement
+from progsnap2.spec.datatypes import PS2Datatype
+from progsnap2.spec.enums import MainTableColumns
+from progsnap2.spec.spec_definition import Column, EnumValue, MainTable, MetadataProperty, ProgSnap2Spec, Property, Requirement
 
 def make_markdown_table(headers, rows):
     # Combine headers and rows to compute the maximum width of each column

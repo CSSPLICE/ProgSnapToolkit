@@ -1,9 +1,9 @@
 
 import os
 import pandas as pd
-from analytics.ps2_dataset import LinkTablePreprocessor, Preprocessor
+from progsnap2.analytics.ps2_dataset import LinkTablePreprocessor, Preprocessor
 import yaml
-from spec.enums import MainTableColumns as Cols, EventType
+from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 
 class CodeBenchAddParentEventIDs(Preprocessor):
     """
