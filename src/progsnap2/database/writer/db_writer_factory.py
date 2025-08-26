@@ -82,10 +82,12 @@ class SQLIOFactory(IOFactory):
         url = db_config.sqlalchemy_url
         if not url:
             raise ValueError("SQLAlchemy URL is not set in the database configuration.")
-        if url.lower().startswith("sqlite://"):
-            file = url[10:]  # Remove 'sqlite://' prefix
-            if not os.path.exists(file):
-                raise FileNotFoundError(f"SQLite database file '{file}' does not exist.")
+        # This isn't the place for a file check, since if in write mode, it
+        # doesn't need to exist yet. Yet another reason to split this class.
+        # if url.lower().startswith("sqlite://"):
+        #     file = url[10:]  # Remove 'sqlite://' prefix
+            # if not os.path.exists(file):
+            #     raise FileNotFoundError(f"SQLite database file '{file}' does not exist.")
         self.engine = create_engine(db_config.sqlalchemy_url, echo=db_config.echo)
         try:
             self.table_names = inspect(self.engine).get_table_names()

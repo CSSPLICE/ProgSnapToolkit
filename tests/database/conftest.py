@@ -31,7 +31,7 @@ def csv_config(ps2_spec) -> PS2DataWriteConfig:
 
 @pytest.fixture(scope="session")
 def sqlite_writer_factory(ps2_spec, sqlite_config):
-    return SQLIOFactory(ps2_spec, sqlite_config)
+    return SQLIOFactory(sqlite_config, ps2_spec)
 
 
 TEMP_DIR = "test_data"

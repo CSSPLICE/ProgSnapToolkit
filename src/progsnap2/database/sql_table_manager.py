@@ -38,13 +38,13 @@ class SQLWriterTableManager(SQLTableManager):
         self.metadata_values = db_config.metadata
         self.spec = spec
         self.db_config = db_config
-        self._sql_metadata: MetaData = None
         self.main_table: Table = None
         self.link_tables: dict[str, Table] = {}
         self.metadata_table: Table = None
         self.codestates_table: Table = None
 
-        self._define_tables()
+        metadata = self._create_metadata()
+        super().__init__(metadata)
 
     def has_codestates_table(self) -> bool:
         """
@@ -104,8 +104,8 @@ class SQLWriterTableManager(SQLTableManager):
         return SQLColumn(column_spec.name, col_type, **kwargs)
 
 
-    def _define_tables(self):
-        self._sql_metadata = metadata = MetaData()
+    def _create_metadata(self):
+        metadata = MetaData()
         spec = self.spec
 
         # --- Metadata Table ---
@@ -162,8 +162,10 @@ class SQLWriterTableManager(SQLTableManager):
                 *cols_etc
             )
 
+        return metadata
+
     def create_tables(self, conn: Connection):
-        self._sql_metadata.create_all(conn)
+        self._metadata.create_all(conn)
 
     def update_tables(self, conn: Connection):
         """

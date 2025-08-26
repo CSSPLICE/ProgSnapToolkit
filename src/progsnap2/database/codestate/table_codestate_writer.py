@@ -73,6 +73,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         super().__init__()
         self.conn = context.conn
         self.table = context.table_manager.get_table(CoreTables.CodeStates)
+        self.context = context
 
     def add_codestate_and_get_id(self, codestate: ContextualCodeStateEntry) -> str:
         codestate_id = self.get_codestate_id_from_hash(codestate)
@@ -92,17 +93,17 @@ class SQLTableCodeStateWriter(CodeStateWriter):
                 # the one we are trying to add
                 return
 
-            dict = {
-                Cols.CodeStateID: codestate_id,
-                Cols.Code: section.Code,
-            }
-            if self.context.data_config.codestates_have_sections:
-                dict[Cols.CodeStateSection] = section.CodeStateSection
-            elif section.CodeStateSection:
-                raise ValueError("CodeStateSection should be None; this dataset does not support sections.")
-
             # Add the code state to the CodeStates table using a structured query
             for section in codestate.sections:
+                dict = {
+                    Cols.CodeStateID: codestate_id,
+                    Cols.Code: section.Code,
+                }
+                if self.context.data_config.codestates_have_sections:
+                    dict[Cols.CodeStateSection] = section.CodeStateSection
+                elif section.CodeStateSection:
+                    raise ValueError("CodeStateSection should be None; this dataset does not support sections.")
+
                 statement = self.table.insert().values(**dict)
                 self.conn.execute(statement)
 
