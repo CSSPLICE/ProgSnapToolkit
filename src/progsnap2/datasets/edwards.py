@@ -1,12 +1,29 @@
-from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity
+from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
 from progsnap2.analytics.preprocessors.edwards import ClassSubsetPreprocessor, TimeStampToDateTimePreprocessor
+from progsnap2.database.config import PS2DataConfig
 from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace
+
+from progsnap2.spec.metadata import MetadataValues
+
+def _create_data_config(root_path: str):
+    return PS2DataConfig(
+        root_path=root_path,
+        main_table_file="MainTable.csv",
+        # These datasets don't provide metadata, so we create one that mostly
+        # using defaults
+        metadata=MetadataValues(
+            IsEventOrderingConsistent=True,
+            EventOrderScope="Global",
+        )
+    )
 
 _base_name = "edwards"
 
 _base_2019_config = AnalyticsConfig(
     name=_base_name,
+    create_data_config=_create_data_config,
+    programming_language=ProgrammingLanguage.Python,
     granularity=Granularity.Keystroke,
 
     primary_timestamp_column=Cols.ClientTimestamp,
@@ -43,5 +60,7 @@ F19 = replace(_base_2019_config,
 F19.main_table_preprocessors.append(
     ClassSubsetPreprocessor("Fall")
 )
+
+# TODO: Add 2021
 
 # TODO: Need to figure out what to do with the "Group" column in the grades link table

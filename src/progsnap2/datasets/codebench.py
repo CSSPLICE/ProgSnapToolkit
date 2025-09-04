@@ -1,4 +1,4 @@
-from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity
+from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
 from progsnap2.analytics.preprocessors.codebench import CodeBenchAddParentEventIDs, YAMLLinkURLPreprocessor
 from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace
@@ -23,6 +23,7 @@ _base_config = AnalyticsConfig(
 
     grades_link_table_name="CourseSubject",
     final_grade_column="final-grade",
+    programming_language=ProgrammingLanguage.Python,
 )
 
 F24 = replace(_base_config,

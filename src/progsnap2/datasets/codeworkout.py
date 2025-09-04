@@ -41,12 +41,12 @@ def _create_data_config(root_path: str):
     return PS2DataConfig(
         root_path=root_path,
         main_table_file="MainTable.csv",
-        metadata_table_name="Metadata",
         codestates_table_relative_path="LinkTables/CodeStates.csv",
-        # CWO Doesn't provide metadata, so we create one that mostly
-        # uses defaults
+        # These datasets don't provide metadata, so we create one that mostly
+        # using defaults
         metadata=MetadataValues(
-            IsEventOrderingConsistent=True
+            IsEventOrderingConsistent=True,
+            EventOrderScope="Global",
         )
     )
 
