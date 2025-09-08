@@ -26,8 +26,8 @@ _base_config = AnalyticsConfig(
 )
 
 S24 = replace(_base_config,
-    name=f"{_base_name}_S24",
-    create_data_config=lambda root_path: _create_data_config(root_path, "S24"),
+    name=f"{_base_name}_s24",
+    create_data_config=lambda root_path: _create_data_config(root_path, "s24"),
 
     # early_time="2019-03-15 00:00:00", TODO
 )

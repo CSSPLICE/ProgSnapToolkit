@@ -44,7 +44,12 @@ class IOFactory(ABC):
                 print("Warning: No PS2 spec version found in metadata. Using default spec.")
                 self.ps2_spec = PS2Versions.load_default()
             else:
-                self.ps2_spec = PS2Versions.load_from_string(version)
+                try:
+                    self.ps2_spec = PS2Versions.load_from_string(version)
+                except:
+                    default_spec = PS2Versions.load_default()
+                    print(f"Warning: Unable to load PS2 spec for version '{version}'. Using default spec: {default_spec.version}.")
+                    self.ps2_spec = default_spec
 
     @abstractmethod
     def create_writer(self) -> "SQLWriterContextManager | CSVIOContextManager":
@@ -82,12 +87,12 @@ class SQLIOFactory(IOFactory):
         url = db_config.sqlalchemy_url
         if not url:
             raise ValueError("SQLAlchemy URL is not set in the database configuration.")
-        # This isn't the place for a file check, since if in write mode, it
-        # doesn't need to exist yet. Yet another reason to split this class.
-        # if url.lower().startswith("sqlite://"):
-        #     file = url[10:]  # Remove 'sqlite://' prefix
-            # if not os.path.exists(file):
-            #     raise FileNotFoundError(f"SQLite database file '{file}' does not exist.")
+
+        if url.lower().startswith("sqlite://"):
+            file = url[10:]  # Remove 'sqlite://' prefix
+            if not os.path.exists(file):
+                print(f"Warning: SQLite database file '{file}' does not exist.")
+
         self.engine = create_engine(db_config.sqlalchemy_url, echo=db_config.echo)
         try:
             self.table_names = inspect(self.engine).get_table_names()
