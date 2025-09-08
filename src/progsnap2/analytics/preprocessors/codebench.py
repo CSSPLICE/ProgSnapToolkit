@@ -29,6 +29,24 @@ class CodeBenchAddParentEventIDs(Preprocessor):
 
         return main_table
 
+class CodeBenchRemoveSmallClassesPreprocessor(Preprocessor):
+    """
+    Preprocessor that removes classes with fewer than a specified number of submissions.
+    """
+
+    def __init__(self, min_count: int = 1000):
+        self.min_count = min_count
+
+    def apply(self, dataset, main_table):
+        if Cols.CourseSectionID not in main_table.columns:
+            return main_table
+
+        class_counts = main_table[Cols.CourseSectionID].value_counts()
+        invalid_class_ids = class_counts[class_counts < self.min_count].index
+        print(f"Removing classes with less than {self.min_count} submissions: {invalid_class_ids.tolist()}")
+        main_table = main_table[~main_table[Cols.CourseSectionID].isin(invalid_class_ids) & ~main_table[Cols.CourseSectionID].isna()]
+        return main_table
+
 class YAMLLinkURLPreprocessor(LinkTablePreprocessor):
 
     def __init__(self, flatten: bool = False):
@@ -81,6 +99,14 @@ class YAMLLinkURLPreprocessor(LinkTablePreprocessor):
             return dict(items)
 
         return flatten(obj)
+
+
+class CodeBenchRemoveGradeDuplicatesPreprocessor(LinkTablePreprocessor):
+    def apply(self, dataset, link_table_name, link_table):
+        if link_table_name.startswith("CourseSubject"):
+            return link_table.drop_duplicates()
+        return link_table
+
 
 class CodeBenchExamPerformance:
     """

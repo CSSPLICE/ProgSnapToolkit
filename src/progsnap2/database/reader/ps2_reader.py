@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import pandas as pd
 
 from pandas import DataFrame
 
@@ -58,4 +59,8 @@ class PS2Reader(ABC):
             raise ValueError("Error: DataFrame must contain 'Property' and 'Value' columns.")
 
         result_dict = metadata_table.set_index('Property')['Value'].to_dict()
+        # Replace any NaN values with None to ensure proper handling in MetadataValues
+        for key, value in result_dict.items():
+            if pd.isna(value):
+                result_dict[key] = None
         return MetadataValues(**result_dict)
