@@ -22,12 +22,12 @@ _base_config = AnalyticsConfig(
 
     submit_event=EventType.Submit,
 
-    final_grade_column="X-Grade", # TODO
+    final_grade_column="FinalExamGrade",
 )
 
 S24 = replace(_base_config,
     name=f"{_base_name}_s24",
     create_data_config=lambda root_path: _create_data_config(root_path, "s24"),
-
-    # early_time="2019-03-15 00:00:00", TODO
+    early_time="2024-02-12 00:00:00",
+    end_time="2024-04-12 00:00:00",
 )
