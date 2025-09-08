@@ -28,24 +28,25 @@ _base_2019_config = AnalyticsConfig(
 
     primary_timestamp_column=Cols.ClientTimestamp,
     main_table_preprocessors=[
-        # Don't need this, since I've done and cached it
-        # AddErrors2021Preprocessor(),
         TimeStampToDateTimePreprocessor(),
     ],
 
     compile_event=EventType.RunProgram,
 
-    grades_link_table_name="CourseSubject",
+    grades_link_table_name="SubjectTerm",
     final_grade_column="exam2",
 )
+_base_2019_config.attempt_grouping_columns.append(Cols.TermID)
 
 S19 = replace(_base_2019_config,
     name=f"{_base_name}_s19",
 
     start_time=None,
     end_time="2019-02-25 00:00:00",
-    early_time=None, # TODO
+    early_time='2019-02-04 00:00:00',
 )
+# Copy the list before modification, since replace is a shallow copy!
+S19.main_table_preprocessors = S19.main_table_preprocessors.copy()
 S19.main_table_preprocessors.append(
     ClassSubsetPreprocessor("Spring")
 )
@@ -55,12 +56,21 @@ F19 = replace(_base_2019_config,
 
     start_time=None,
     end_time="2019-10-13 00:00:00",
-    early_time=None, # TODO
+    early_time='2019-09-22 00:00:00',
 )
+F19.main_table_preprocessors = F19.main_table_preprocessors.copy()
 F19.main_table_preprocessors.append(
     ClassSubsetPreprocessor("Fall")
 )
 
-# TODO: Add 2021
+F21 = replace(_base_2019_config,
 
-# TODO: Need to figure out what to do with the "Group" column in the grades link table
+    name=f"{_base_name}_f21",
+    end_time="2021-12-15 00:00:00",
+    early_time='2021-10-24 00:00:00',
+
+    start_time=None,
+    primary_problem_grouping_column=Cols.AssignmentID,
+    final_grade_column="FinalScore",
+    grades_link_table_name="Subject",
+)

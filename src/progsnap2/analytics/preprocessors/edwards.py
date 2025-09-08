@@ -30,6 +30,7 @@ class ClassSubsetPreprocessor(Preprocessor):
         if self.semester not in ["Spring", "Fall"]:
             raise ValueError(f"Invalid semester: {self.semester}. Must be 'Spring' or 'Fall'.")
         filtered_table = main_table[main_table["X-ClassID"] == self.semester].copy()
+        filtered_table[Cols.TermID] = self.semester
         return filtered_table
 
 class AddErrors2021Preprocessor(Preprocessor):
