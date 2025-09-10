@@ -33,7 +33,7 @@ _base_2019_config = AnalyticsConfig(
 
     compile_event=EventType.RunProgram,
 
-    grades_link_table_name="SubjectTerm",
+    grades_link_table_name="LinkSubjectTerm",
     final_grade_column="exam2",
 )
 _base_2019_config.attempt_grouping_columns.append(Cols.TermID)
@@ -72,5 +72,5 @@ F21 = replace(_base_2019_config,
     start_time=None,
     primary_problem_grouping_column=Cols.AssignmentID,
     final_grade_column="FinalScore",
-    grades_link_table_name="Subject",
+    grades_link_table_name="LinkSubject",
 )
