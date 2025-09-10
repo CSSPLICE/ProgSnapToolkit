@@ -39,7 +39,11 @@ class SQLReader(PS2Reader):
 
     def get_link_table(self, table_name):
         if table_name not in self.table_names:
-            raise ValueError(f"Table {table_name} does not exist in the database.")
+            with_link = "Link" + table_name
+            if with_link in self.table_names:
+                table_name = with_link
+            else:
+                raise ValueError(f"Table {table_name} does not exist in the database.")
 
         return self._get_table(table_name)
 

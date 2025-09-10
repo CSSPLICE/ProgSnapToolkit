@@ -1,4 +1,5 @@
 from progsnap2.analytics.analytics_config import AnalyticsConfig, Granularity, ProgrammingLanguage
+from progsnap2.analytics.ps2_dataset import SortPreprocessor
 from progsnap2.database.config import PS2DataConfig
 from progsnap2.spec.enums import MainTableColumns as Cols, EventType
 from dataclasses import replace
@@ -18,9 +19,12 @@ _base_config = AnalyticsConfig(
 
     primary_timestamp_column=Cols.ServerTimestamp,
     main_table_preprocessors=[
+        SortPreprocessor(),
     ],
 
     submit_event=EventType.Submit,
+    compile_event=EventType.Submit,
+    compile_error_event=EventType.FileEdit,
 
     final_grade_column="FinalExamGrade",
 )
