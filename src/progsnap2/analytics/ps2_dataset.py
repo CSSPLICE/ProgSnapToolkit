@@ -106,6 +106,16 @@ class PS2Dataset:
             link_table = preprocessor.apply(self, table_name, link_table)
         return link_table
 
+    def add_codestates(self, dataframe: DataFrame) -> DataFrame:
+        """
+        Adds a CodeState column to the given DataFrame by joining with the
+        CodeStates table on the CodeStateID column.
+        """
+        if Cols.CodeStateID not in dataframe.columns:
+            raise Exception(f"Cannot add CodeState column: {Cols.CodeStateID} column not found in DataFrame.")
+        codestates = self.get_codestates(dataframe[Cols.CodeStateID].unique())
+        return dataframe.merge(codestates, on=Cols.CodeStateID, how='left')
+
     def get_codestates(self, codestate_ids: list[str] | pd.Series = None) -> DataFrame:
         """
         Returns the CodeStates table as a DataFrame, optionally collecting

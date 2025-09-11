@@ -82,11 +82,11 @@ class SQLReader(PS2Reader):
         # Remove the table if it exists
         conn.execute(text(f"DROP TABLE IF EXISTS {temp_table_name};"))
         # Create a temporary table
-        conn.execute(text(f"CREATE TEMP TABLE {temp_table_name} ({Cols.CodeStateID} INTEGER);"))
+        conn.execute(text(f"CREATE TEMP TABLE {temp_table_name} ({Cols.CodeStateID} TEXT);"))
 
         # Insert rows
         conn.execute(
             text(f"INSERT INTO {temp_table_name} ({Cols.CodeStateID}) VALUES (:id);"),
-            [{"id": int(i)} for i in codestate_ids]
+            [{"id": str(i)} for i in codestate_ids]
         )
 
