@@ -72,7 +72,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
     def __init__(self, context: SQLContext):
         super().__init__()
         self.conn = context.conn
-        self.table = context.table_manager.get_table(CoreTables.CodeStates)
+        self.table = None
         self.context = context
 
     def add_codestate_and_get_id(self, codestate: ContextualCodeStateEntry) -> str:
@@ -81,6 +81,10 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         return codestate_id
 
     def add_codestate_with_id(self, codestate: ContextualCodeStateEntry, codestate_id: str):
+        # Defer reading the table in case this is an early call (before initialization)
+        if self.table is None:
+            self.table = self.context.table_manager.get_table(CoreTables.CodeStates)
+
         # Execute as a transaction to ensure atomicity
         with self.conn.begin():
             # Check if the code state already exists in the database

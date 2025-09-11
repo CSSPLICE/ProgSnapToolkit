@@ -54,6 +54,8 @@ class SQLReader(PS2Reader):
     def get_codestates_table(self):
         return self._get_table(CoreTables.CodeStates)
 
+    # TODO: This really should use the codestate_io, since technically there could
+    # be non-table codestate representations!
     def get_codestates_table_subset(self, codestate_ids: list[str]) -> DataFrame:
         """
         Returns a subset of the CodeStates table for the given list of codestate IDs.
