@@ -12,6 +12,7 @@ def _create_data_config(root_path: str, name: str):
 
 _base_name = "cs1eng"
 
+# TODO: Original paper used only HWs: should I filter in that way?
 _base_config = AnalyticsConfig(
     name=_base_name,
     programming_language=ProgrammingLanguage.Python,
