@@ -2,8 +2,10 @@
 from abc import ABC, abstractmethod
 import hashlib
 from typing import Optional
+from pandas import DataFrame
 
 from progsnap2.spec.codestate import CodeStateEntry, CodeStateSectionEntry
+from progsnap2.spec.enums import CodeStatesTableColumns as CodeStateCols
 
 
 class ContextualCodeStateEntry(CodeStateEntry):
@@ -86,3 +88,38 @@ class CodeStateWriter(ABC):
         where the ID must correspond to the commit hash.
         """
 
+    @abstractmethod
+    def get_codestates_table(self) -> DataFrame:
+        """
+        Get the entire CodeStates table as a DataFrame.
+        """
+        pass
+
+    @abstractmethod
+    def do_codestates_have_sections(self) -> bool:
+        """
+        Check if the CodeStates table includes sections.
+        """
+        pass
+
+    def _check_dataframe_for_codestate_columns(self, df: DataFrame):
+        if CodeStateCols.CodeStateID not in df.columns not in df.columns:
+            raise ValueError("DataFrame must contain a 'CodeStateID' column.")
+        # TODO: I need to decide whether I want to support getting *all* sections
+        # for a set of CodeStateIDs, or whether sections to match are required.
+        # The MainTable reasonably won't pair CodeStateSections with CodeStates at all time...
+        # Probably not useful to require it...
+        # if self.do_codestates_have_sections() and CodeStateCols.CodeStateSection not in df.columns:
+        #     raise ValueError("DataFrame must contain 'CodeStateSection' column for this dataset.")
+
+    @abstractmethod
+    def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
+        """
+        Returns a subset of the CodeStates table that match the rows of the given DataFrame.
+        :param rows: DataFrame containing the rows to match. Must contain 'CodeStateID'
+        and any other applicable columns, depending on the CodeState format.
+        :return: DataFrame containing the filtered CodeStates.
+        Note: The returned DataFrame may contain multiple rows per CodeStateID if the
+        CodeStates have sections, and the order may not match the input DataFrame.
+        """
+        pass

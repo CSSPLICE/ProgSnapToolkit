@@ -1,10 +1,12 @@
 import csv
-from sqlalchemy import insert
+from sqlalchemy import insert, text
 from progsnap2.database.codestate.codestate_writer import ContextualCodeStateEntry, CodeStateWriter
 from progsnap2.database.config import PS2DataWriteConfig
 from progsnap2.database.sql_context import IOContext, SQLContext
 from progsnap2.spec.enums import CodeStatesTableColumns as Cols, CoreTables
 import os
+import pandas as pd
+from pandas import DataFrame
 
 class CSVTableCodeStateWriter(CodeStateWriter):
 
@@ -67,12 +69,41 @@ class CSVTableCodeStateWriter(CodeStateWriter):
 
                 writer.writerow(dict)
 
+    def get_codestates_table_path(self):
+        # TODO: This and SQL should probably have util functions for reading tables
+        # to reduce code duplication
+        path = self.config.codestates_table_path
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"No CSV file found at '{path}'.")
+        return path
+
+    def do_codestates_have_sections(self):
+        path = self.get_codestates_table_path()
+        return pd.read_csv(path, nrows=1).columns.contains(Cols.CodeStateSection)
+
+    def get_codestates_table(self):
+        path = self.get_codestates_table_path()
+        return pd.read_csv(path)
+
+    def get_codestates_table_subset(self, rows):
+        self._check_dataframe_for_codestate_columns(rows)
+        table = self.get_codestates_table()
+        return table[table[Cols.CodeStateID].isin(rows[Cols.CodeStateID])].copy()
+
+        # This code was for matching on CodeSectionIDs as well, but I don't think
+        # we actually want to do that.
+        # cols = [Cols.CodeStateID]
+        # if Cols.CodeStateSection in rows.columns:
+        #     cols.append(Cols.CodeStateSection)
+        # merged = pd.merge(table, rows, on=cols)
+        # return merged[cols]
+
 class SQLTableCodeStateWriter(CodeStateWriter):
 
     def __init__(self, context: SQLContext):
         super().__init__()
         self.conn = context.conn
-        self.table = None
+        self._table = None
         self.context = context
 
     def add_codestate_and_get_id(self, codestate: ContextualCodeStateEntry) -> str:
@@ -80,16 +111,20 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         self.add_codestate_with_id(codestate, codestate_id)
         return codestate_id
 
+    def get_table(self):
+        if self._table is None:
+            self._table = self.context.table_manager.get_table(CoreTables.CodeStates)
+        return self._table
+
     def add_codestate_with_id(self, codestate: ContextualCodeStateEntry, codestate_id: str):
         # Defer reading the table in case this is an early call (before initialization)
-        if self.table is None:
-            self.table = self.context.table_manager.get_table(CoreTables.CodeStates)
+        table = self.get_table()
 
         # Execute as a transaction to ensure atomicity
         with self.conn.begin():
             # Check if the code state already exists in the database
-            select_statement = self.table.select().where(
-                self.table.c.CodeStateID == codestate_id
+            select_statement = table.select().where(
+                table.c.CodeStateID == codestate_id
             )
             result = self.conn.execute(select_statement).fetchone()
             if result:
@@ -108,8 +143,65 @@ class SQLTableCodeStateWriter(CodeStateWriter):
                 elif section.CodeStateSection:
                     raise ValueError("CodeStateSection should be None; this dataset does not support sections.")
 
-                statement = self.table.insert().values(**dict)
+                statement = self._table.insert().values(**dict)
                 self.conn.execute(statement)
+
+    def do_codestates_have_sections(self):
+        table = self.get_table()
+        return Cols.CodeStateSection in table.c
+
+    def get_codestates_table(self):
+        return pd.read_sql_table(
+            CoreTables.CodeStates,
+            self.context.conn,
+        )
+
+    def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
+        if not self.context.data_config.sqlalchemy_url.lower().startswith("sqlite://"):
+            raise ValueError("This method is only supported for SQLite databases.")
+
+        self._check_dataframe_for_codestate_columns(rows)
+
+        temp_table_name = "temp_ids"
+        self._create_temp_id_table(temp_table_name, rows)
+
+        query = f"""
+            SELECT cs.*
+            FROM {CoreTables.CodeStates} cs
+            JOIN temp_ids temp ON cs.{Cols.CodeStateID} = temp.{Cols.CodeStateID}
+        """
+        # if self.do_codestates_have_sections():
+        #     query += f" AND cs.{Cols.CodeStateSection} = temp.{Cols.CodeStateSection}"
+
+        # Join the temporary table with CodeStateIDs to fetch with
+        # the CodeStates table.
+        return pd.read_sql(query, self.context.conn)
+
+    def _create_temp_id_table(self, temp_table_name, rows: DataFrame, add_sections = False) -> DataFrame:
+        conn = self.context.conn
+
+        # Remove the table if it exists
+        conn.execute(text(f"DROP TABLE IF EXISTS {temp_table_name};"))
+
+        create_query = f"CREATE TEMP TABLE {temp_table_name} ({Cols.CodeStateID} TEXT"
+        if add_sections:
+            create_query += f", {Cols.CodeStateSection} TEXT"
+        create_query += ");"
+
+        # Create a temporary table
+        conn.execute(create_query)
+
+        # Insert rows
+        if add_sections:
+            conn.execute(
+                text(f"INSERT INTO {temp_table_name} ({Cols.CodeStateID}, {Cols.CodeStateSection}) VALUES (:id, :section);"),
+                [{"id": str(id), "section": str(section)} for id, section in rows[[Cols.CodeStateID, Cols.CodeStateSection]].itertuples(index=False)]
+            )
+        else:
+            conn.execute(
+                text(f"INSERT INTO {temp_table_name} ({Cols.CodeStateID}) VALUES (:id);"),
+                [{"id": str(id)} for id in rows[Cols.CodeStateID].tolist()]
+            )
 
 
 

@@ -1,6 +1,7 @@
 import os
 import shutil
 from git import Repo
+from pandas import DataFrame
 
 from progsnap2.database.codestate.codestate_writer import CodeStateWriter, ContextualCodeStateEntry
 
@@ -70,3 +71,16 @@ class GitCodeStateWriter(CodeStateWriter):
         repo.close()
 
         return hex
+
+    def get_codestates_table(self):
+        raise ValueError(
+            """
+            Loading all codestates in Git format is very time consuming.
+            For best results, load only a subset of codestates using get_codestates_table_subset(codestate_ids).
+            If you need all codestates, you can pass a list of all codestate IDs to that function.
+            """
+        )
+
+    def get_codestates_table_subset(self, codestate_ids: list[str]) -> DataFrame:
+        # directory = os.path.join(self.root, grouping_id, codestate.ProjectID)
+        return None
