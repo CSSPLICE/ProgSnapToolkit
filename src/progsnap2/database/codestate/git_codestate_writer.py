@@ -81,6 +81,10 @@ class GitCodeStateWriter(CodeStateWriter):
             """
         )
 
-    def get_codestates_table_subset(self, codestate_ids: list[str]) -> DataFrame:
+    def do_codestates_have_sections(self):
+        # Note: Codestates likely *do* have sections in Git format, but we can't be sure
+        return False
+
+    def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
         # directory = os.path.join(self.root, grouping_id, codestate.ProjectID)
         return None
