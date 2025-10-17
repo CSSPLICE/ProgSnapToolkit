@@ -1,6 +1,7 @@
 import os
 import shutil
 from git import Repo
+import pandas as pd
 from pandas import DataFrame
 
 from progsnap2.database.codestate.codestate_writer import CodeStateWriter, ContextualCodeStateEntry
@@ -25,7 +26,7 @@ class GitCodeStateWriter(CodeStateWriter):
 
     def get_repo_dir(self, project_id, grouping_id = None):
         grouping_id = grouping_id or ''
-        directory = os.path.join(self.root, grouping_id, project_id)
+        directory = os.path.join(self.root, str(grouping_id), str(project_id))
         return directory
 
     def get_repo(self, create_if_missing, project_id, grouping_id = None):
@@ -95,26 +96,41 @@ class GitCodeStateWriter(CodeStateWriter):
         raise NotImplementedError("GitCodeStateWriter does not support checking for sections.")
 
     def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
-        self._check_dataframe_for_codestate_columns(rows, [
-            Cols.CodeStateID,
-            Cols.ProjectID,
-            # TODO: This should be specified in the config, but hard-coding for now to test
-            Cols.SubjectID
-        ])
+        # TODO: This should be specified in the config, but hard-coding for now to test
+        grouping_id = Cols.SubjectID
+        grouping_cols = [Cols.ProjectID]
+        # When this is configurable, could be none
+        if grouping_id is not None:
+            grouping_cols.append(grouping_id)
+        grouping_cols = [str(c) for c in grouping_cols]
+        self._check_dataframe_for_codestate_columns(rows, [Cols.CodeStateID] + grouping_cols)
 
-    def get_codestates_for_repo(self, project_id: str, grouping_id, code_state_ids: list[str]) -> DataFrame:
+        parts = []
+        for _, group in rows.groupby(grouping_cols, as_index=False):
+            part = self._get_codestates_for_repo(group, grouping_id)
+            parts.append(part)
+
+        return pd.concat(parts, ignore_index=True)
+
+    def _get_codestates_for_repo(self, rows: DataFrame, grouping_id_col) -> DataFrame:
+        # Assumes that all rows share a project/grouping id
+        first_row = rows.iloc[0]
+        project_id = first_row[str(Cols.ProjectID)]
+        grouping_id = None if grouping_id_col is None else first_row[grouping_id_col]
+
+        directory = self.get_repo_dir(project_id, grouping_id)
         repo = self.get_repo(False, project_id, grouping_id)
         if repo is None:
-            print(f"Warning: No repository found for project ID '{project_id}' and grouping ID '{grouping_id}'.")
+            print(f"Warning: No repository found at: {directory}")
             return None
 
-        rows = []
+        code_rows = []
 
-        for code_state_id in code_state_ids:
+        for code_state_id in rows[Cols.CodeStateID]:
             try:
                 commit = repo.commit(code_state_id)
             except Exception as e:
-                print(f"Warning: Commit '{code_state_id}' not found in repository at {repo.git_dir}.")
+                print(f"Warning: Commit '{code_state_id}' not found in repository at {directory}.")
                 continue
 
             # Get all files in the commit
@@ -123,13 +139,13 @@ class GitCodeStateWriter(CodeStateWriter):
                 if blob.type == 'blob':  # Ensure it's a file
                     file_content = blob.data_stream.read().decode('utf-8')
                     section_name = os.path.basename(blob.path)
-                    rows.append({
+                    code_rows.append({
                         Cols.CodeStateID: code_state_id,
                         CodeCols.Code: file_content,
                         CodeCols.CodeStateSection: section_name
                     })
         repo.close()
-        return DataFrame(rows)
+        return DataFrame(code_rows)
 
 
 

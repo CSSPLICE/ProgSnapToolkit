@@ -34,10 +34,6 @@ class PS2Reader(ABC):
     def get_link_table_names(self) -> list[str]:
         pass
 
-    @abstractmethod
-    def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
-        pass
-
     def get_metadata_values(self) -> MetadataValues:
         """
         Reads the metadata table and returns it as a MetadataValues object.
