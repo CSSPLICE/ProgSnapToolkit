@@ -102,9 +102,10 @@ class CodeStateWriter(ABC):
         """
         pass
 
-    def _check_dataframe_for_codestate_columns(self, df: DataFrame):
-        if CodeStateCols.CodeStateID not in df.columns not in df.columns:
-            raise ValueError("DataFrame must contain a 'CodeStateID' column.")
+    def _check_dataframe_for_codestate_columns(self, df: DataFrame, cols=[CodeStateCols.CodeStateID]):
+        for col in cols:
+            if col not in df.columns:
+                raise ValueError(f"DataFrame must contain a '{col}' column.")
         # TODO: I need to decide whether I want to support getting *all* sections
         # for a set of CodeStateIDs, or whether sections to match are required.
         # The MainTable reasonably won't pair CodeStateSections with CodeStates at all time...

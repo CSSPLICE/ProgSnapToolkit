@@ -165,18 +165,23 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         temp_table_name = "temp_ids"
         self._create_temp_id_table(temp_table_name, rows)
 
+        if Cols.CodeStateSection in rows.columns:
+            print("Warning: CodeStateSection column is ignored when fetching subset of CodeStates.\n" \
+            "All sections for matching CodeStateIDs will be returned.")
+
         query = f"""
             SELECT cs.*
             FROM {CoreTables.CodeStates} cs
             JOIN temp_ids temp ON cs.{Cols.CodeStateID} = temp.{Cols.CodeStateID}
         """
-        # if self.do_codestates_have_sections():
-        #     query += f" AND cs.{Cols.CodeStateSection} = temp.{Cols.CodeStateSection}"
 
         # Join the temporary table with CodeStateIDs to fetch with
         # the CodeStates table.
         return pd.read_sql(query, self.context.conn)
 
+    # Note that right now, we never add sections because we match only
+    # on CodeStateID and return all matches. Keeping this as an
+    # option as it might be useful later.
     def _create_temp_id_table(self, temp_table_name, rows: DataFrame, add_sections = False) -> DataFrame:
         conn = self.context.conn
 
@@ -189,7 +194,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         create_query += ");"
 
         # Create a temporary table
-        conn.execute(create_query)
+        conn.execute(text(create_query))
 
         # Insert rows
         if add_sections:

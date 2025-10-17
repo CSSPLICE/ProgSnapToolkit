@@ -4,6 +4,7 @@ from git import Repo
 from pandas import DataFrame
 
 from progsnap2.database.codestate.codestate_writer import CodeStateWriter, ContextualCodeStateEntry
+from progsnap2.spec.enums import MainTableColumns as Cols, CodeStatesTableColumns as CodeCols
 
 # TODO: Handle locking and other things?
 # This would probably require a fair bit of work, may be out of scope
@@ -22,15 +23,24 @@ class GitCodeStateWriter(CodeStateWriter):
     def requires_project_id(self):
         return True
 
-    def add_codestate_and_get_id(self, codestate: ContextualCodeStateEntry) -> str:
-        grouping_id = codestate.grouping_id or ''
-        directory = os.path.join(self.root, grouping_id, codestate.ProjectID)
+    def get_repo_dir(self, project_id, grouping_id = None):
+        grouping_id = grouping_id or ''
+        directory = os.path.join(self.root, grouping_id, project_id)
+        return directory
+
+    def get_repo(self, create_if_missing, project_id, grouping_id = None):
+        directory = self.get_repo_dir(project_id, grouping_id)
         if not os.path.exists(directory):
-            os.makedirs(directory, exist_ok=True)
-            # create a new git repo in the director
-            repo = Repo.init(directory)
-        else:
-            repo = Repo(directory)
+            if create_if_missing:
+                os.makedirs(directory, exist_ok=True)
+                return Repo.init(directory)
+            else:
+                return None
+        return Repo(directory)
+
+    def add_codestate_and_get_id(self, codestate: ContextualCodeStateEntry) -> str:
+        directory = self.get_repo_dir(codestate.ProjectID, codestate.grouping_id)
+        repo = self.get_repo(True, codestate.ProjectID, codestate.grouping_id)
 
         # Delete all files not under the .git folder
         for item in os.listdir(directory):
@@ -82,9 +92,47 @@ class GitCodeStateWriter(CodeStateWriter):
         )
 
     def do_codestates_have_sections(self):
-        # Note: Codestates likely *do* have sections in Git format, but we can't be sure
-        return False
+        raise NotImplementedError("GitCodeStateWriter does not support checking for sections.")
 
     def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
-        # directory = os.path.join(self.root, grouping_id, codestate.ProjectID)
-        return None
+        self._check_dataframe_for_codestate_columns(rows, [
+            Cols.CodeStateID,
+            Cols.ProjectID,
+            # TODO: This should be specified in the config, but hard-coding for now to test
+            Cols.SubjectID
+        ])
+
+    def get_codestates_for_repo(self, project_id: str, grouping_id, code_state_ids: list[str]) -> DataFrame:
+        repo = self.get_repo(False, project_id, grouping_id)
+        if repo is None:
+            print(f"Warning: No repository found for project ID '{project_id}' and grouping ID '{grouping_id}'.")
+            return None
+
+        rows = []
+
+        for code_state_id in code_state_ids:
+            try:
+                commit = repo.commit(code_state_id)
+            except Exception as e:
+                print(f"Warning: Commit '{code_state_id}' not found in repository at {repo.git_dir}.")
+                continue
+
+            # Get all files in the commit
+            tree = commit.tree
+            for blob in tree.traverse():
+                if blob.type == 'blob':  # Ensure it's a file
+                    file_content = blob.data_stream.read().decode('utf-8')
+                    section_name = os.path.basename(blob.path)
+                    rows.append({
+                        Cols.CodeStateID: code_state_id,
+                        CodeCols.Code: file_content,
+                        CodeCols.CodeStateSection: section_name
+                    })
+        repo.close()
+        return DataFrame(rows)
+
+
+
+
+
+

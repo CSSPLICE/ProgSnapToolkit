@@ -108,27 +108,31 @@ class PS2Dataset:
 
     def add_codestates(self, dataframe: DataFrame) -> DataFrame:
         """
-        Adds a CodeState column to the given DataFrame by joining with the
-        CodeStates table on the CodeStateID column.
+        Merges the CodeStates table with the given DataFrame on the CodeStateID column.
+        Note that if the CodeStates table has CodeStateSections, this will raise an error,
+        since this would result in multiple rows per CodeStateID in the result, which is
+        like not the intended behavior.
         """
         if Cols.CodeStateID not in dataframe.columns:
             raise Exception(f"Cannot add CodeState column: {Cols.CodeStateID} column not found in DataFrame.")
-        codestates = self.get_codestates(dataframe[Cols.CodeStateID].unique())
+        codestates = self.get_codestates(dataframe)
+        if Cols.CodeStateSection in codestates.columns:
+            if codestates.groupby(Cols.CodeStateID).size().max() > 1:
+                raise Exception("Cannot add CodeStates: CodeStates table has sections, which would result in multiple rows per CodeStateID.")
         return dataframe.merge(codestates, on=Cols.CodeStateID, how='left')
 
-    def get_codestates(self, codestate_ids: list[str] | pd.Series = None) -> DataFrame:
+    def get_codestates(self, rows: DataFrame | None = None) -> DataFrame:
         """
         Returns the CodeStates table as a DataFrame, optionally collecting
-        only a subset rows matching the given CodeStateIDs. This is useful
-        for larger datasets, where all CodeStates may not fit in memory.
+        only a subset rows matching the CodeStateID in the given DataFrame.
+        This is useful for larger datasets, where all CodeStates may not
+        easily fit in memory.
         """
-        if codestate_ids is isinstance(codestate_ids, pd.Series):
-            codestate_ids = codestate_ids.tolist()
         with self.factory.create_reader() as reader:
-            if codestate_ids is None:
+            if rows is None:
                 return reader.get_codestates_table()
             else:
-                return reader.get_codestates_table_subset(codestate_ids)
+                return reader.get_codestates_table_subset(rows)
 
 
 class SortPreprocessor(Preprocessor):

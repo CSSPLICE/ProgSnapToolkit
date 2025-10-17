@@ -6,11 +6,6 @@ from progsnap2.database.sql_context import SQLContext
 import pandas as pd
 from pandas import DataFrame
 
-from progsnap2.database.sql_table_manager import SQLWriterTableManager
-from progsnap2.spec.codestate import CodeStateEntry
-from progsnap2.spec.enums import CoreTables, MainTableColumns as Cols
-
-from sqlalchemy import text
 from sqlalchemy import select
 
 

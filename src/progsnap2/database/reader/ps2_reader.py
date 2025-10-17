@@ -35,11 +35,7 @@ class PS2Reader(ABC):
         pass
 
     @abstractmethod
-    def get_codestates_table(self) -> DataFrame:
-        pass
-
-    @abstractmethod
-    def get_codestates_table_subset(self, codestate_ids: list[str]) -> DataFrame:
+    def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
         pass
 
     def get_metadata_values(self) -> MetadataValues:
@@ -68,6 +64,6 @@ class PS2Reader(ABC):
     def get_codestates_table(self):
         return self.codestate_io.get_codestates_table()
 
-    def get_codestates_table_subset(self, codestate_ids: list[str]) -> DataFrame:
-        return self.codestate_io.get_codestates_table_subset(codestate_ids)
+    def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
+        return self.codestate_io.get_codestates_table_subset(rows)
 
