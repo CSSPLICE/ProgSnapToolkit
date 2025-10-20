@@ -34,14 +34,6 @@ class PS2Reader(ABC):
     def get_link_table_names(self) -> list[str]:
         pass
 
-    @abstractmethod
-    def get_codestates_table(self) -> DataFrame:
-        pass
-
-    @abstractmethod
-    def get_codestates_table_subset(self, codestate_ids: list[str]) -> DataFrame:
-        pass
-
     def get_metadata_values(self) -> MetadataValues:
         """
         Reads the metadata table and returns it as a MetadataValues object.
@@ -64,3 +56,10 @@ class PS2Reader(ABC):
             if pd.isna(value):
                 result_dict[key] = None
         return MetadataValues(**result_dict)
+
+    def get_codestates_table(self):
+        return self.codestate_io.get_codestates_table()
+
+    def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
+        return self.codestate_io.get_codestates_table_subset(rows)
+

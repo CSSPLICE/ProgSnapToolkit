@@ -9,6 +9,8 @@ enum_types:
         description: CodeStates will be stored in individual folders, with each folder containing all code files, organized by SubjectID.
       - name: Git
         description: CodeStates will be stored in Git repositories, with commit hashes used as CodeStateIDs, organized by SubjectID and ProjectID.
+      - name: Keystroke
+        description: Rather than directly storing Codestates, the MainTable will contain InsertedText and DeletedText columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed.
 
   - name: EventInitiator
     values:
@@ -454,6 +456,17 @@ main_table:
       description: |
         The actual intervention message shown to the student, when applicable. If no message is shown but a visual effect occurs, the effect should be described (possibly using a dataset-specific coding scheme).
 
+    - name: InsertedText
+      requirement: EventSpecific
+      datatype: String
+      description: |
+        The text inserted by this File.Edit event, if any.
+
+    - name: DeletedText
+      requirement: EventSpecific
+      datatype: String
+      description: |
+        The text deleted by this File.Delete event, if any.
 
   event_types:
     - name: Session.Start
@@ -535,6 +548,8 @@ main_table:
       optional_columns:
         - EventInitiator
         - SourceLocation
+        - InsertedText
+        - DeletedText
 
     - name: File.Focus
       description: Indicates that a file was selected by the user within the user interface.

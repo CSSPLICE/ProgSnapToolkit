@@ -51,11 +51,3 @@ class CSVReader(PS2Reader):
         if not os.path.exists(path):
             return []
         return [f[:-4] for f in os.listdir(path) if f.endswith('.csv')]
-
-    def get_codestates_table(self):
-        path = self.context.data_config.codestates_table_path
-        return self._get_table(path)
-
-    def get_codestates_table_subset(self, codestate_ids):
-        table = self.get_codestates_table()
-        return table[table[Cols.CodeStateID].isin(codestate_ids)].copy()

@@ -14,7 +14,7 @@ if __name__ == "__main__":
     schema = PS2Versions.v1_0.load()
 
     out = generate_enums_for_spec(schema)
-    with open("src/spec/enums.py", "w", encoding='utf-8') as f:
+    with open("src/progsnap2/spec/enums.py", "w", encoding='utf-8') as f:
         f.write(out)
 
     out = generate_ts_methods(schema)
