@@ -15,6 +15,7 @@ def _create_data_config(root_path: str):
         metadata=MetadataValues(
             IsEventOrderingConsistent=True,
             EventOrderScope="Global",
+            CodeStateRepresentation="Keystroke",
         )
     )
 

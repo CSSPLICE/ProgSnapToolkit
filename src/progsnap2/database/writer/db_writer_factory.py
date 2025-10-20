@@ -4,6 +4,7 @@ import os
 from progsnap2.database.codestate.git_codestate_writer import GitCodeStateWriter
 from progsnap2.database.codestate.directory_codestate_writer import DirectoryCodeStateWriter
 from progsnap2.database.codestate.table_codestate_writer import CSVTableCodeStateWriter, SQLTableCodeStateWriter
+from progsnap2.database.codestate.keystroke_codestate_writer import KeystrokeCodestateIO
 
 from sqlalchemy import Connection, create_engine, inspect
 from progsnap2.database.config import PS2DataConfig, PS2DataWriteConfig
@@ -69,6 +70,8 @@ class IOFactory(ABC):
             return DirectoryCodeStateWriter(db_config.codestates_dir)
         elif self.codestate_representation == CodeStateRepresentation.Git:
             return GitCodeStateWriter(db_config.codestates_dir)
+        elif self.codestate_representation == CodeStateRepresentation.Keystroke:
+            return KeystrokeCodestateIO()
         else:
             raise ValueError(f"Invalid code state representation: {self.codestate_representation}")
 
