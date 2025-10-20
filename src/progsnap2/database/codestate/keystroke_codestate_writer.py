@@ -1,3 +1,4 @@
+import textwrap
 import pandas as pd
 from pandas import DataFrame
 from progsnap2.database.codestate.codestate_writer import CodeStateWriter
@@ -9,10 +10,9 @@ class KeystrokeCodestateIO(CodeStateWriter):
 
     # TODO: These aren't reasonable default grouping columns; need a way to configure
     # I'm tempted to just say it's ProjectID always and add that to Edwards
-    def __init__(self, grouping_cols = [Cols.SubjectID, Cols.AssignmentID], order_col = None):
+    def __init__(self, grouping_cols = [Cols.SubjectID, Cols.AssignmentID, Cols.CodeStateSection]):
         super().__init__()
         self.grouping_cols = grouping_cols
-        self.order_col = order_col
 
     def add_codestate_and_get_id(self, codestate: CodeStateEntry) -> str:
         raise NotImplementedError("KeystrokeCodestateIO is currently read only.")
@@ -41,25 +41,27 @@ class KeystrokeCodestateIO(CodeStateWriter):
                 insert = '' if pd.isna(row.InsertText) else row.InsertText
                 delete = '' if pd.isna(row.DeleteText) else row.DeleteText
                 if i > len(s):
-                    raise ValueError(f"SourceLocation {i} is out of bounds for current code length {len(s)}. \
-                                     Are you sure you are passing a contiguous edit sequence?")
+                    print(textwrap.dedent(f"""
+                            SourceLocation {i} is out of bounds for current code length {len(s)} at
+                            EventID {row[Cols.EventID]}.
+                            Are you sure you are passing a contiguous edit sequence?
+                            Skipping the rest of this file...""").replace('\n', ' '))
+                    break
                 s = s[:i] + insert + s[i+len(delete):]
             codestates.append(s)
+
+        # Pad codestates in case we broke out of the loop early
+        while len(codestates) < len(df):
+            codestates.append(pd.NA)
         df[CodeCols.Code] = codestates
         return df
 
     def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
         required_cols = list(self.grouping_cols) + [Cols.EventType, Cols.SourceLocation, 'InsertText', 'DeleteText']
-        if self.order_col is not None:
-            required_cols.append(self.order_col)
         self._check_dataframe_for_codestate_columns(rows, required_cols)
 
         parts = []
-        for _, group in rows.groupby(required_cols, as_index=False):
-            if self.order_col is not None:
-                # Confirm the group is in contiguous order
-                if not group[self.order_col].is_monotonic_increasing:
-                    raise ValueError(f"Rows for project/grouping id {group.iloc[0][self.grouping_cols]} are not in order by {self.order_col}.")
+        for _, group in rows.groupby(self.grouping_cols, as_index=False):
             part = KeystrokeCodestateIO.reconstruct_all(group)
             parts.append(part)
 
