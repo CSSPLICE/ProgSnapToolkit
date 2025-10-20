@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/spec/**/*.yaml'
-      - 'src/spec/gen/gen_docs.py'
+      - 'src/progsnap2/spec/**/*.yaml'
+      - 'src/progsnap2/spec/gen/gen_docs.py'
       - 'scripts/*.py'
   workflow_dispatch:
 
