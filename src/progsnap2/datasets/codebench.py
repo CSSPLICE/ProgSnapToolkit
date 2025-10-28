@@ -32,7 +32,8 @@ _base_config = AnalyticsConfig(
     compile_event=EventType.Submit,
     compile_error_event=EventType.RunTest,
 
-    grades_link_table_name="CourseSubject",
+    grades_link_table_name="CourseCourseSectionSubject",
+    attempt_grouping_columns=[Cols.SubjectID, Cols.AssignmentID, Cols.ProblemID, Cols.CourseSectionID],
     final_grade_column="final-grade",
     programming_language=ProgrammingLanguage.Python,
 )
