@@ -28,7 +28,7 @@ AnyAdditionalColumns = data_model_gen.AnyAdditionalColumns
 
 api_config = PS2APIConfig.from_yaml(os.path.join(src_dir, "api/api_config.yaml"), spec)
 
-db_writer_factory: SQLIOFactory = IOFactory.create_factory(api_config.database_config, spec=spec)
+db_writer_factory: SQLIOFactory = IOFactory.create_factory(api_config.database_config, ps2_spec=spec)
 
 with db_writer_factory.create_writer() as writer:
     # Create the tables in the database

@@ -32,6 +32,7 @@ class ContextualCodeStateEntry(CodeStateEntry):
     def from_codestate_entry(cls, codestate_entry: CodeStateEntry, grouping_id: str, project_id: str) -> "ContextualCodeStateEntry":
         return cls(
             sections=codestate_entry.sections,
+            is_blank=codestate_entry.is_blank,
             grouping_id=grouping_id,
             ProjectID=project_id
         )

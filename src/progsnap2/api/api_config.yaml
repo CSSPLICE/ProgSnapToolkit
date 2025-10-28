@@ -1,7 +1,7 @@
 
 database_config:
   root_path: ./test-data/
-  sqlalchemy_url: sqlite:///example.db
+  sqlalchemy_url: sqlite:///test-data/example.db
   echo: true
   optimize_codestate_ids: true
 

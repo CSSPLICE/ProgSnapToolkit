@@ -1,1 +1,1 @@
-set PYTHONPATH=./src && uvicorn --app-dir ./src api.main:app --reload
+set PYTHONPATH=./src && uvicorn --app-dir ./src progsnap2.api.main:app --reload --reload-dir ./src/

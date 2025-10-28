@@ -47,8 +47,6 @@ class SQLWriter(DBWriter):
 
         for event in events:
             try:
-                print("Insert!")
-                print(event)
                 statement = insert(main_table).values(**event)
                 self.conn.execute(statement)
             except Exception as e:
@@ -84,14 +82,11 @@ class SQLWriter(DBWriter):
 
         # Add the needed information to codestates
         for id, codestate in codestates.items():
-            print(id)
             if not isinstance(codestate, ContextualCodeStateEntry):
                 project_id = project_id_map.get(id)
                 subject_id = subject_id_map.get(id)
-                print(project_id, subject_id)
                 if self.codestate_writer.requires_project_id() and project_id is None:
-                    print("Adding warning")
-                    result.warnings.append(f"CodeState format requires a ProjectID but none provided for CodeStateID {codestate_id}. Using default.")
+                    result.warnings.append(f"CodeState format requires a ProjectID but none provided for CodeStateID {id}. Using default.")
                     project_id = self.codestate_writer.get_default_project_id()
                 codestate = ContextualCodeStateEntry.from_codestate_entry(codestate, subject_id, project_id)
                 codestates[id] = codestate
@@ -107,11 +102,12 @@ class SQLWriter(DBWriter):
 
         for event in events:
             if Cols.CodeStateID in event:
-                if event[Cols.CodeStateID] not in temp_codestate_id_map:
-                    result.warnings.append(f"CodeStateID {event[Cols.CodeStateID]} not found in temp_codestate_id_map.")
+                temp_codestate_id = event[Cols.CodeStateID]
+                if temp_codestate_id not in temp_codestate_id_map:
+                    result.warnings.append(f"CodeStateID {temp_codestate_id} not found in temp_codestate_id_map.")
                     continue
 
-                event[Cols.CodeStateID] = temp_codestate_id_map[event[Cols.CodeStateID]]
+                event[Cols.CodeStateID] = temp_codestate_id_map[temp_codestate_id]
 
     def initialize_database(self, force=False) -> None:
         if not force and self.context.table_manager.have_tables_been_created(self.conn):
