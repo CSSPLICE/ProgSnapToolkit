@@ -200,9 +200,9 @@ class TimePreprocessor(Preprocessor):
         converted = []
         for i in range(len(timestamp_strings)):
             try:
-                converted.append(datatypes.parse_timestamp(timestamp_strings[i]))
+                converted.append(datatypes.parse_timestamp(timestamp_strings.iloc[i]))
             except ValueError as e:
-                print(f"Warning: Could not parse '{time_column_name}' value '{timestamp_strings[i]}': {e}")
+                print(f"Warning: Could not parse '{time_column_name}' value '{timestamp_strings.iloc[i]}': {e}")
                 print("Column will use string values instead.")
                 break
 
