@@ -126,7 +126,7 @@ class GitCodeStateWriter(CodeStateWriter):
 
         code_rows = []
 
-        for code_state_id in rows[Cols.CodeStateID]:
+        for code_state_id in rows[Cols.CodeStateID].unique():
             try:
                 commit = repo.commit(code_state_id)
             except Exception as e:
