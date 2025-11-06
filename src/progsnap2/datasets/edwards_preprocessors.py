@@ -29,7 +29,7 @@ class ClassSubsetPreprocessor(Preprocessor):
     def apply(self, dataset: PS2Dataset, main_table: DataFrame) -> DataFrame:
         if self.semester not in ["Spring", "Fall"]:
             raise ValueError(f"Invalid semester: {self.semester}. Must be 'Spring' or 'Fall'.")
-        filtered_table = main_table[main_table["X-ClassID"] == self.semester].copy()
+        filtered_table = main_table[main_table[Cols.TermID] == self.semester].copy()
         filtered_table[Cols.TermID] = self.semester
         return filtered_table
 
