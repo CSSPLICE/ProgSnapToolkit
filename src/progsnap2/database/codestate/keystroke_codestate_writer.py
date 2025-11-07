@@ -34,8 +34,11 @@ class KeystrokeCodestateIO(CodeStateWriter):
         if not in_place:
             df = df.copy()
         codestates = []
+        is_reliable = True
+        reliable_rows = []
         s = ''
         for _, row in df.iterrows():
+            row_reliabile = True
             if row[Cols.EventType] == EventType.FileEdit:
                 i = int(row[Cols.SourceLocation])
                 insert = '' if pd.isna(row.InsertText) else row.InsertText
@@ -44,16 +47,20 @@ class KeystrokeCodestateIO(CodeStateWriter):
                     print(textwrap.dedent(f"""
                             SourceLocation {i} is out of bounds for current code length {len(s)} at
                             EventID {row[Cols.EventID]}.
-                            Are you sure you are passing a contiguous edit sequence?
-                            Skipping the rest of this file...""").replace('\n', ' '))
-                    break
+                            This warning is expected for Edwards2021, but still indicates possible issues.
+                            Check the "IsCodeReliable" column for affected rows.
+                            Adjusting bounds...
+                            """).replace('\n', ' '))
+                    is_reliable = False
                 s = s[:i] + insert + s[i+len(delete):]
             codestates.append(s)
+            reliable_rows.append(is_reliable)
 
         # Pad codestates in case we broke out of the loop early
         while len(codestates) < len(df):
             codestates.append(pd.NA)
         df[CodeCols.Code] = codestates
+        df['IsCodeReliable'] = reliable_rows
         return df
 
     def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
