@@ -70,6 +70,24 @@ class PS2Dataset:
             return None
         return getattr(self.metadata_values, property_name)
 
+    def get_metadata_table(self, raw: bool) -> DataFrame:
+        """
+        Returns the metadata table as a DataFrame.
+        :param raw: If True, returns the raw metadata table from the dataset, without any processing.
+                    Otherwise, gets values from the config as well.
+        :return: The metadata table as a DataFrame with Property and Value columns.
+        """
+        if raw:
+            with self.factory.create_reader() as reader:
+                return reader.get_metadata_table()
+
+        # Return metadata from config
+        metadata_dict = {
+            "Property": list(self.metadata_values.__dict__.keys()),
+            "Value": list(self.metadata_values.__dict__.values())
+        }
+        return pd.DataFrame(metadata_dict)
+
     def get_main_table(self) -> DataFrame:
         """
         Returns the main table as a DataFrame.
