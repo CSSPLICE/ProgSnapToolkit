@@ -6,7 +6,7 @@ from progsnap2.database.sql_context import SQLContext
 import pandas as pd
 from pandas import DataFrame
 
-from sqlalchemy import select
+from sqlalchemy import Connection, select
 
 from progsnap2.database.sql_table_manager import SQLTableManager
 from progsnap2.spec.enums import CoreTables
@@ -20,6 +20,9 @@ class SQLReader(PS2Reader):
 
     def get_table_manager(self) -> SQLTableManager:
         return self.context.table_manager
+
+    def get_conn(self) -> Connection:
+        return self.context.conn
 
     def _get_table(self, table_name: str) -> DataFrame:
         return pd.read_sql_table(

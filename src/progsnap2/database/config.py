@@ -72,6 +72,8 @@ class PS2DataConfig(BaseModel):
 
     def validate_metadata(self, spec: ProgSnap2Spec) -> bool:
         metadata_class = create_metadata_values_model(spec.metadata)
+        if self.metadata is None:
+            return True
         try:
             self.metadata = metadata_class(**self.metadata)
             return True
