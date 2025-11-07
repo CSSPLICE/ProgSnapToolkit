@@ -10,7 +10,6 @@ def to_sqlite(dataset: PS2Dataset, path: str, replace: bool):
             raise FileExistsError(f"File {path} already exists and replace is set to False.")
         os.remove(path)
     conn = sqlite3.connect(path)
-    _save_dataframe_to_sqlite(dataset.get_main_table(), CoreTables.MainTable.value, conn)
     try:
         metadata_df = dataset.get_metadata_table(False)
         _save_dataframe_to_sqlite(metadata_df, CoreTables.MetadataTable.value, conn)
@@ -28,6 +27,7 @@ def to_sqlite(dataset: PS2Dataset, path: str, replace: bool):
     except NotImplementedError:
         repr = dataset.get_metadata_property(MetadataProperties.CodeStateRepresentation.value)
         print(f"Warning: Codestates not available for CodeStateRepresentation '{repr}'; skipping codestates table.")
+    _save_dataframe_to_sqlite(dataset.get_main_table(), CoreTables.MainTable.value, conn)
 
 def _save_dataframe_to_sqlite(df: pd.DataFrame, table_name: str, conn: sqlite3.Connection):
     df.to_sql(table_name, conn, if_exists='replace', index=False)
