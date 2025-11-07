@@ -12,7 +12,7 @@ def to_sqlite(dataset: PS2Dataset, path: str, replace: bool):
     conn = sqlite3.connect(path)
     try:
         metadata_df = dataset.get_metadata_table(False)
-        _save_dataframe_to_sqlite(metadata_df, CoreTables.MetadataTable.value, conn)
+        _save_dataframe_to_sqlite(metadata_df, CoreTables.Metadata.value, conn)
     except NotImplementedError:
         print("Warning: Metadata table not available in the dataset or config; skipping.")
     for link_table_name in dataset.get_link_table_names():
