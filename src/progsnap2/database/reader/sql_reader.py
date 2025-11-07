@@ -8,12 +8,18 @@ from pandas import DataFrame
 
 from sqlalchemy import select
 
+from progsnap2.database.sql_table_manager import SQLTableManager
+from progsnap2.spec.enums import CoreTables
+
 
 class SQLReader(PS2Reader):
 
     def __init__(self, context: SQLContext, codestate_io: CodeStateWriter):
         super().__init__(context, codestate_io)
         self.table_names = context.table_manager.table_names
+
+    def get_table_manager(self) -> SQLTableManager:
+        return self.context.table_manager
 
     def _get_table(self, table_name: str) -> DataFrame:
         return pd.read_sql_table(

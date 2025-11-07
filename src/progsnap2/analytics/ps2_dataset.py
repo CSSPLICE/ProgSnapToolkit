@@ -114,6 +114,13 @@ class PS2Dataset:
             head = preprocessor.apply(self, head)
         return head
 
+    def get_link_table_names(self) -> list[str]:
+        """
+        Returns the names of the link tables in the dataset.
+        """
+        with self.factory.create_reader() as reader:
+            return reader.get_link_table_names()
+
     def get_link_table(self, table_name: str) -> DataFrame:
         """
         Returns the link table as a DataFrame.
