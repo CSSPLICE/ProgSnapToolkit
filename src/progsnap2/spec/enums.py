@@ -328,12 +328,12 @@ class MainTableColumns(str, Enum):
     The actual intervention message shown to the student, when applicable. If no message is shown but a visual effect occurs, the effect should be described (possibly using a dataset-specific coding scheme).
     """
 
-    InsertedText = 'InsertedText'
+    InsertText = 'InsertText'
     """
     The text inserted by this File.Edit event, if any.
     """
 
-    DeletedText = 'DeletedText'
+    DeleteText = 'DeleteText'
     """
     The text deleted by this File.Delete event, if any.
     """
@@ -420,7 +420,7 @@ class CodeStateRepresentation(str, Enum):
     Git = 'Git'
     """CodeStates will be stored in Git repositories, with commit hashes used as CodeStateIDs, organized by SubjectID and ProjectID."""
     Keystroke = 'Keystroke'
-    """Rather than directly storing Codestates, the MainTable will contain InsertedText and DeletedText columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed."""
+    """Rather than directly storing Codestates, the MainTable will contain InsertText and DeleteText columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed."""
     def __str__(self):
         return self.value
 
