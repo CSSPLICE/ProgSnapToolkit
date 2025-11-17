@@ -45,6 +45,11 @@ class SubmissionScoreMetrics:
     up to and including the first correct attempt.
     """
 
+    FIRST_SCORE: Final[str] = "FirstScore"
+    """
+    The score of the first attempt made to solve a problem.
+    """
+
     TOTAL_ATTEMPTS: Final[str] = "TotalAttempts"
     """
     The total number of attempts made to solve a problem,
@@ -83,6 +88,7 @@ class SubmissionScoreMetrics:
         attempts = len(scores_until_correct)
         first_correct = not scores_until_correct.empty and \
             scores_until_correct.iloc[0] >= self.correctness_threshold
+        first_score = scores_until_correct.iloc[0] if not scores_until_correct.empty else 0
         attempted = attempts > 0
         min_score = scores_until_correct.min() if not scores_until_correct.empty else 0
         mean_score = scores_until_correct.mean() if not scores_until_correct.empty else 0
@@ -96,6 +102,7 @@ class SubmissionScoreMetrics:
             self.MAX_SCORE: max_score,
             self.MIN_SCORE: min_score,
             self.MEAN_SCORE: mean_score,
+            self.FIRST_SCORE: first_score,
             self.TOTAL_ATTEMPTS: total_attempts
         }
         return Series(score_metrics)
