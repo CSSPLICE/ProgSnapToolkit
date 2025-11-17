@@ -11,6 +11,8 @@ class SubmissionScoreMetrics:
     """
     The number of attempts made to solve a problem,
     up to and including the first correct attempt.
+    Only includes submissions where the student received
+    a feedback (i.e., a score).
     """
 
     FIRST_CORRECT: Final[str] = "FirstCorrect"
@@ -85,7 +87,7 @@ class SubmissionScoreMetrics:
             after_correct_loc = first_correct_loc + 1
             scores_until_correct = scores.iloc[:after_correct_loc]
 
-        attempts = len(scores_until_correct)
+        attempts = scores_until_correct.notna().sum()
         first_correct = not scores_until_correct.empty and \
             scores_until_correct.iloc[0] >= self.correctness_threshold
         first_score = scores_until_correct.iloc[0] if not scores_until_correct.empty else 0
