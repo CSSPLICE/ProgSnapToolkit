@@ -57,8 +57,8 @@ def is_valid_timezone_offset(timezone: str) -> bool:
         return False
 
 class DBStringLength(Enum):
-    Short = "ID",
-    Path = "Path",
+    Short = "ID"
+    Path = "Path"
 
 class PS2Datatype(Enum):
 
@@ -74,7 +74,7 @@ class PS2Datatype(Enum):
     # Typescript type for Enums should be custom, so we use None
     Enum = ("Enum", str, None, DBStringLength.Short)
 
-    def __init__(self, label: str, python_type: type, typescript_type: str, max_str_length: Optional[int] = None):
+    def __init__(self, label: str, python_type: type, typescript_type: str, max_str_length: Optional[DBStringLength] = None):
         self.label = label
         self.python_type = python_type
         self.typescript_type = typescript_type
