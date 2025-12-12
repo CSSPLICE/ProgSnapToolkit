@@ -4,6 +4,8 @@ from progsnap2.spec.spec_definition import ProgSnap2Spec, Column
 from progsnap2.spec.datatypes import PS2Datatype
 import textwrap
 
+# TODO: Optional params can be a pain and their order is irrelevant,
+# so they should be in an optional object rather than named args.
 def create_ts_template():
     return """
 /**
@@ -13,8 +15,8 @@ def create_ts_template():
 {% for arg in args %} * @param {{ arg.name }} - {{ arg.ps2_name }}: {{ arg.description }}
 {% endfor %} * @returns void
  */
-public {{ method_name }}({% for arg in args %}{{ arg.name }}{{ arg.optional_q  }}: {{ arg.type }}{% if not loop.last %}, {% endif %}{% endfor %}) {
-    this.logEvent(EventType.{{ event_type }}, {
+public {{ method_name }}({% for arg in args %}{{ arg.name }}{{ arg.optional_q  }}: {{ arg.type }}{% if not loop.last %}, {% endif %}{% endfor %}): PS2.MainTableEvent {
+    return this.logEvent(EventType.{{ event_type }}, {
         {% for arg in args %}{{ arg.ps2_name }}: {{ arg.name }}{% if not loop.last %}, {% endif %}{% endfor %}
     });
 }
