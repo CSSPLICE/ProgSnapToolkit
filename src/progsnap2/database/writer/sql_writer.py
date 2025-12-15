@@ -1,4 +1,4 @@
-import datetime
+from enum import Enum
 from sqlalchemy import insert
 from progsnap2.database.codestate.codestate_writer import CodeStateEntry, CodeStateWriter, ContextualCodeStateEntry
 from progsnap2.database.writer.db_writer import DBWriter, LogResult
@@ -27,21 +27,17 @@ class SQLWriter(DBWriter):
             if Cols.ServerTimestamp not in event:
                 event[Cols.ServerTimestamp] = get_current_timestamp()
 
-    def add_events_with_codestates(self, events: EventList, codestates: CodeStatesMap) -> LogResult:
+    def add_events(self, events: EventList) -> LogResult:
         result = LogResult(True)
 
         for event in events:
+            # Convert any enums to their values
+            for col in event.keys():
+                print(col, type(event[col]))
+                if isinstance(event[col], Enum):
+                    print(f"Converting enum {event[col]} to value {event[col].value}")
+                    event[col] = event[col].value
             result.warnings.extend([str(warning) for warning in self.context.event_validator.validate_event(event)])
-
-        # Must come before optimizing!
-        self._contextualize_codestates(events, codestates, result)
-
-        # TODO: I wonder if we should pass the result to append warnings
-        if self.context.data_config.optimize_codestate_ids:
-            self._optimize_codestate_ids(events, codestates, result)
-        else:
-            for codestate_id, codestate in codestates.items():
-                self.codestate_writer.add_codestate_with_id(codestate, codestate_id)
 
         main_table = self.context.table_manager.main_table
 
@@ -57,6 +53,23 @@ class SQLWriter(DBWriter):
 
         if result.success:
             self.conn.commit()
+
+        return result
+
+    def add_events_with_codestates(self, events: EventList, codestates: CodeStatesMap) -> LogResult:
+        result = LogResult(True)
+
+        # Must come before optimizing!
+        self._contextualize_codestates(events, codestates, result)
+
+        # TODO: I wonder if we should pass the result to append warnings
+        if self.context.data_config.optimize_codestate_ids:
+            self._optimize_codestate_ids(events, codestates, result)
+        else:
+            for codestate_id, codestate in codestates.items():
+                self.codestate_writer.add_codestate_with_id(codestate, codestate_id)
+
+        result.extend(self.add_events(events))
 
         return result
 

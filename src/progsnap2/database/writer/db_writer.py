@@ -8,6 +8,11 @@ class LogResult:
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
+    def extend(self, other: 'LogResult'):
+        self.warnings.extend(other.warnings)
+        self.errors.extend(other.errors)
+        self.success = self.success and other.success
+
 
 class DBWriter(ABC):
     pass
