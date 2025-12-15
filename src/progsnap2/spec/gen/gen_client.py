@@ -69,10 +69,15 @@ def generate_ts_methods(schema: ProgSnap2Spec) -> str:
         add_args(evt.required_columns, True, schema, args)
         add_args(evt.optional_columns, False, schema, args)
 
+        # Convert from pascal case to uppercase snake case
+        event_type = evt.name.replace(".", "")
+        event_type = ''.join(['_' + c.lower() if c.isupper() else c for c in event_type]).lstrip('_')
+        event_type = event_type.upper()
+
         method_str = template.render(
             method_name="log" + pascal_case(evt.name),
             event_name=evt.name,
-            event_type=evt.name.upper().replace(".", "_"),
+            event_type=event_type,
             args=args,
             docstring=evt.description if evt.description else "",
         )

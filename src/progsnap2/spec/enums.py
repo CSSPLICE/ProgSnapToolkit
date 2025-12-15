@@ -125,19 +125,9 @@ class MainTableColumns(str, Enum):
     If the CodeState represents free-form student work not associated with a specific assignment or problem, this value should be empty. Stand-alone problems also do not need to be associated with assignments.
     """
 
-    AssignmentIsGraded = 'AssignmentIsGraded'
-    """
-    This value indicates whether or not the assignment specified by the AssignmentID was graded (true) or ungraded (false).
-    """
-
     ProblemID = 'ProblemID'
     """
     The identifier for the programming problem associated with the event. Each unique problem must have its own identifier that is distinct from other identifiers in the same column that correspond to different problems. If a record specifying a ProblemID also specifies an AssignmentID, it means that the problem is part of the specified assignment. There is no requirement that problems are associated with an assignment: for example, a standalone practice problem might not be considered to be part of an assignment.
-    """
-
-    ProblemIsGraded = 'ProblemIsGraded'
-    """
-    This value indicates whether or not the problem specified by the ProblemID was graded (true) or ungraded (false).
     """
 
     Attempt = 'Attempt'
@@ -150,25 +140,11 @@ class MainTableColumns(str, Enum):
     If this data was logged as part of an experiment, this column can be used to specify the experimental condition that the event took place in. Condition names must be consistent for events in the same condition, and (if possible) distinct between different experiments. This can be accomplished by assigning each experiment in the dataset a distinct name. An example condition string is "02/18 Parsons Problem Study: Control"; this establishes the condition (control case), the study content (parsons problems), and when the study took place (February 2018).
     """
 
-    TeamID = 'TeamID'
-    """
-    This value indicates the identity of a team. There are two possible meanings of TeamID:
-    * If the TeamID value is different from the SubjectID value, it means that the SubjectID designates a single individual, and the TeamID value identifies the team the individual belongs to.
-    * If the TeamID value is the same as the SubjectID value, it means that the SubjectID designates a team, and that the event is ascribed to the team as a whole rather than any individual member of the team.
-
-    When this value is used, a Link Table should be created to map the TeamID to a list of SubjectIDs, when known. This should be done with two columns: the first column the TeamID, the second a single SubjectID, where the number of rows the TeamID appears in maps to the number of SubjectIDs.
-    """
-
     LoggingErrorID = 'LoggingErrorID'
     """
     Logging errors are an inevitable part of the data collection process. If a data collector finds that an error occurred during the logging process, they should leave the data in its original state, but annotate all erroneous data with IDs, where each ID corresponds to a specific logging error event. Further information about the error can then be provided in a link table (which should include the ID, error type, and an explanation).
 
     Note that logging errors can come in many forms, including corrupted/lost data, server downtime, and tool errors that result in incorrect feedback. We define a logging error to be anything that results in the log not accurately representing the true state of the world.
-    """
-
-    IsFabricatedEvent = 'IsFabricatedEvent'
-    """
-    When true, this field indicates that an event was "fabricated" after the fact, rather than being directly logged by the original programming environment. This might occur when converting from another log format into ProgSnap2 format, or when supplemental information is added after the fact. For example, if a system only logs Compile.Error events, a Compile event may be assumed and fabricated to accompany these events. Or, if Compile.Error events are not logged, but can be derived from the code in post hoc analysis, these could be added as fabricated events. This column should be accompanied by documentation in the README that explains what assumptions were made when creating these fabricated events. Since it is always possible to make mistakes when fabricating events, marking these explicitly can be helpful in discovering possible mistakes.
     """
 
     ParentEventID = 'ParentEventID'
@@ -204,6 +180,16 @@ class MainTableColumns(str, Enum):
     Note that a CodeStateSection may only refer to a single file.  Cases where multiple resources are accessed or modified at the same time (such as using "Save All" to save all files) should be represented as multiple events, each with its own distinct CodeStateSection.
 
     Also note that CodeStateSections should not be used for CodeStates in the Table format, as all table data is contained in the same file.
+    """
+
+    Code = 'Code'
+    """
+    The contents of the CodeStateSection **after** the given event has occurred.
+    """
+
+    CopiedText = 'CopiedText'
+    """
+    The text copied to the clipboard from a code editor.
     """
 
     DestinationCodeStateSection = 'DestinationCodeStateSection'
@@ -338,6 +324,11 @@ class MainTableColumns(str, Enum):
     The text deleted by this File.Delete event, if any.
     """
 
+    DeleteLength = 'DeleteLength'
+    """
+    The length of the text deleted by this File.Delete event, if any. Can be used in place of DeleteText.
+    """
+
     def __str__(self):
         return self.value
 
@@ -367,9 +358,15 @@ class EventType(str, Enum):
     FileCopy = 'File.Copy'
     """Indicates that a file was copied."""
     FileEdit = 'File.Edit'
-    """Indicates that the contents of a file were edited."""
+    """Indicates that the contents of a file were edited. If a ParentEventID is provided, this indicates that multiple edits took place in the same action."""
     FileFocus = 'File.Focus'
     """Indicates that a file was selected by the user within the user interface."""
+    FileCopyText = 'File.CopyText'
+    """
+    Indicates that the user has copied the CopiedText from an open code document to the clipboard. Optionally includes the document (CodeStateSection) and file location (SourceLocation) from which the text was copied.
+    Note that for privacy reasons this even should **not** fire when a user copies text outside of the code editor, as this could contain personal information. However, if extern text is pasted into an editor, this can be indicated by setting EditType attribute to Paste.
+    """
+
     Compile = 'Compile'
     """Indicates an attempt to compile all or part of the code."""
     CompileError = 'Compile.Error'
@@ -420,7 +417,7 @@ class CodeStateRepresentation(str, Enum):
     Git = 'Git'
     """CodeStates will be stored in Git repositories, with commit hashes used as CodeStateIDs, organized by SubjectID and ProjectID."""
     Keystroke = 'Keystroke'
-    """Rather than directly storing Codestates, the MainTable will contain InsertText and DeleteText columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed."""
+    """Rather than directly storing Codestates, the MainTable will contain InsertedText and DeletedText columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed."""
     def __str__(self):
         return self.value
 
