@@ -33,9 +33,7 @@ class SQLWriter(DBWriter):
         for event in events:
             # Convert any enums to their values
             for col in event.keys():
-                print(col, type(event[col]))
                 if isinstance(event[col], Enum):
-                    print(f"Converting enum {event[col]} to value {event[col].value}")
                     event[col] = event[col].value
             result.warnings.extend([str(warning) for warning in self.context.event_validator.validate_event(event)])
 

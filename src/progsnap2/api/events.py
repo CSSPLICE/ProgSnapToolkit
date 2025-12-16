@@ -28,7 +28,7 @@ class DataModelGenerator:
     """
 
     MainTableEvent: type
-    main_event_additional_columns: List[type] = []
+    main_event_additional_columns: dict[str, type]
     AnyAdditionalColumns: type
 
     def __init__(self, ps2_spec: ProgSnap2Spec):
@@ -38,7 +38,9 @@ class DataModelGenerator:
         self.__enum_map = {}
         self.MainTableEvent = self.generate_main_table_event()
         self.main_event_additional_columns = self.generate_main_event_additional_columns()
-        self.AnyAdditionalColumns = Union[tuple(self.main_event_additional_columns)]
+        column_types = [v for v in self.main_event_additional_columns.values()]
+        self.AnyAdditionalColumns = Union[tuple(column_types)]
+
 
     def create_event_type_enum_type(self) -> Enum:
         """
@@ -108,13 +110,13 @@ class DataModelGenerator:
         name = name.replace(".", "")
         return create_model(name, **fields)
 
-    def generate_main_event_additional_columns(self) -> List[type[MainTableEventBase]]:
+    def generate_main_event_additional_columns(self) -> dict[str, type[MainTableEventBase]]:
         """
         Generate classes to hold required and optional event-specific columns for
         each event.
         """
-        column_classes = []
+        column_classes = {}
         for event_type in self.ps2_spec.main_table.event_types:
             subclass = self.generate_event_specific_columns_class(event_type)
-            column_classes.append(subclass)
+            column_classes[event_type.name] = subclass
         return column_classes
