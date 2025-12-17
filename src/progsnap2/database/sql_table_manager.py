@@ -5,7 +5,7 @@ from progsnap2.spec.enums import CodeStateRepresentation
 from progsnap2.spec.spec_definition import ProgSnap2Spec
 
 from datetime import datetime
-from sqlalchemy import Connection, Engine, Index, MetaData, Table, Column as SQLColumn, Integer, String, Float, Enum as SQLEnum, UniqueConstraint, inspect
+from sqlalchemy import Connection, Engine, Index, MetaData, Table, Column as SQLColumn, Integer, String, Float, Enum as SQLEnum, UniqueConstraint, inspect, text
 from sqlalchemy.dialects.sqlite import DATETIME
 
 from progsnap2.spec.datatypes import DBStringLength, PS2Datatype
@@ -176,11 +176,18 @@ class SQLWriterTableManager(SQLTableManager):
         """
 
         # Get the current structure of the database
-        current_metadata = MetaData(bind=conn)
-        current_metadata.reflect()
+        current_metadata = MetaData()
+        current_metadata.reflect(bind=conn.engine)
+
+        tables = {
+            CoreTables.Metadata: self.metadata_table,
+            CoreTables.MainTable: self.main_table,
+            CoreTables.CodeStates: self.codestates_table
+        }
+        tables.update(self.link_tables)
 
         # Iterate through each table defined in our spec-defined metadata
-        for table_name, table in self.link_tables.items():
+        for table_name, table in tables.items():
             # Check if the table exists in the current metadata
             if table_name in current_metadata.tables:
                 # If it exists, check for missing columns
@@ -195,13 +202,17 @@ class SQLWriterTableManager(SQLTableManager):
         Update the columns of a table in the database to match the new table.
         """
         for column in new_table.columns:
+            print(f"--- Checking column {column.name} in table {current_table.name}")
             if column.name not in current_table.columns:
+                print(f"--- Adding column {column.name} to table {current_table.name}")
                 # If the column is missing, add it to the existing table
-                column.create(current_table)
-            if column.type != current_table.columns[column.name].type:
+                query = f"""ALTER TABLE {current_table.name} ADD COLUMN {column.name} {column.type}"""
+                conn.execute(text(query))
+            elif str(column.type) != str(current_table.columns[column.name].type):
                 # If the column type is different, alter the column
                 raise NotImplementedError(
                     f"""Column type change not implemented for {column.name} in {current_table.name}.
+                    {column.type} (new) != {current_table.columns[column.name].type} (old).
                     Please update the database manually."""
                 )
 

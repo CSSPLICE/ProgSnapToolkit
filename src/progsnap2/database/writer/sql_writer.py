@@ -1,4 +1,5 @@
 from enum import Enum
+import uuid
 from sqlalchemy import insert
 from progsnap2.database.codestate.codestate_writer import CodeStateEntry, CodeStateWriter, ContextualCodeStateEntry
 from progsnap2.database.writer.db_writer import DBWriter, LogResult
@@ -27,10 +28,17 @@ class SQLWriter(DBWriter):
             if Cols.ServerTimestamp not in event:
                 event[Cols.ServerTimestamp] = get_current_timestamp()
 
+    def generate_event_id(self) -> str:
+        return str(uuid.uuid4())
+
     def add_events(self, events: EventList) -> LogResult:
+        print("starting insert")
+
         result = LogResult(True)
 
         for event in events:
+            if Cols.EventID not in event:
+                event[Cols.EventID] = self.generate_event_id()
             # Convert any enums to their values
             for col in event.keys():
                 if isinstance(event[col], Enum):
@@ -42,6 +50,7 @@ class SQLWriter(DBWriter):
         for event in events:
             try:
                 statement = insert(main_table).values(**event)
+                print("executing statement")
                 self.conn.execute(statement)
             except Exception as e:
                 result.errors.append(f"Error inserting events: {e}")
@@ -49,6 +58,7 @@ class SQLWriter(DBWriter):
                 result.success = False
                 break
 
+        print("attempted to insert", result.success)
         if result.success:
             self.conn.commit()
 
@@ -125,3 +135,6 @@ class SQLWriter(DBWriter):
             return
         self.context.table_manager.create_tables(self.conn)
         self.context.table_manager.update_metadata_values(self.conn)
+
+    def update_database(self):
+        self.context.table_manager.update_tables(self.conn)

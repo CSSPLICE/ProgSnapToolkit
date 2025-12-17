@@ -47,6 +47,10 @@ class EventValidator():
         provided_columns = [key for key in event.keys() if event[key] is not None]
 
         for col in provided_columns:
+            columns = spec.main_table.get_column(col)
+            if columns is None:
+                errors.append(ValidationError(column=col, type=ErrorType.UnexpectedColumn))
+                continue
             datatype = spec.main_table.get_column(col).datatype
             try:
                 datatype.validate_value(event[col])
