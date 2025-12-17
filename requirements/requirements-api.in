@@ -1,2 +1,3 @@
 openapi
 fastapi
+uvicorn
