@@ -239,7 +239,9 @@ packaging==25.0
     #   nbconvert
     #   pytest
 pandas==2.3.0
-    # via seaborn
+    # via
+    #   progsnap2 (pyproject.toml)
+    #   seaborn
 pandocfilters==1.5.1
     # via nbconvert
 parso==0.8.4
