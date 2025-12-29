@@ -2,9 +2,9 @@ from enum import Enum
 
 class CoreTables(str, Enum):
     """Primary tables in the database."""
-    MainTable = 'MainTable'
-    Metadata = 'Metadata'
-    CodeStates = 'CodeStates'
+    MainTable = 'maintable'
+    Metadata = 'metadata'
+    CodeStates = 'codestates'
     def __str__(self):
         return self.value
 
@@ -393,7 +393,7 @@ class EventType(str, Enum):
 
 class LinkTableNames(str, Enum):
     """Defined LinkTables"""
-    LinkSubject = 'LinkSubject'
+    LinkSubject = 'linksubject'
     """
     A link table with additional information about each student.
     """

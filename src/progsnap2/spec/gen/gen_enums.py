@@ -43,12 +43,13 @@ def format_docstring(doc: str, indent: str) -> str:
     return f'{indent}"""\n' + "\n".join(formatted_lines) + f'\n{indent}"""' + "\n\n"
 
 
-def generate_enum(enum_name: str, enum_values: list[str], doc: str = None, docs: list[str] = None) -> str:
+def generate_enum(enum_name: str, enum_values: list[str], doc: str = None, docs: list[str] = None, lowercase_values: bool = False) -> str:
     enum_str = f"class {enum_name}(str, Enum):\n"
     if doc:
         enum_str += format_docstring(doc, "    ")
     for value, value_doc in zip(enum_values, docs or [None] * len(enum_values)):
         key = value.replace('.', '').replace('-', '_').replace(' ', '_')
+        value = value.lower() if lowercase_values else value
         if key in keyword.kwlist:
             key = f"{key}_"
         enum_str += f"    {key} = '{value}'\n"
@@ -63,7 +64,7 @@ def _generate_core_tables_enum() -> str:
     enum_name = "CoreTables"
     enum_values = ["MainTable", "Metadata", "CodeStates"]
     doc = "Primary tables in the database."
-    return generate_enum(enum_name, enum_values, doc)
+    return generate_enum(enum_name, enum_values, doc, lowercase_values=True)
 
 def _generate_code_state_columns_enum() -> str:
     """
@@ -125,7 +126,7 @@ def _generate_link_table_names_enum(spec: ProgSnap2Spec) -> str:
     enum_values = [link_table.name for link_table in spec.link_tables]
     doc = "Defined LinkTables"
     docs = [link_table.description for link_table in spec.link_tables]
-    return generate_enum(enum_name, enum_values, doc, docs)
+    return generate_enum(enum_name, enum_values, doc, docs, lowercase_values=True)
 
 def generate_link_table_columns_enum(link_table_spec: LinkTableSpec, ps2_spec: ProgSnap2Spec) -> str:
     """

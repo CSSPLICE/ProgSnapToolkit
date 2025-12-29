@@ -102,3 +102,6 @@ class PS2DataWriteConfig(PS2DataConfig):
 
     short_str_length: int = 255
     path_str_length: int = 2048
+
+    indexed_columns: list[str] = []
+    """List of column names to create indexes for in the main table."""

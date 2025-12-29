@@ -57,7 +57,8 @@ class SQLWriterTableManager(SQLTableManager):
         Check if tables have already been created.
         Note: this does not check whether tables are out of date.
         """
-        return inspect(conn.engine).has_table(self.metadata_table.name)
+        metadata = inspect(conn.engine)
+        return metadata.has_table(self.metadata_table.name) and metadata.has_table(self.main_table.name)
 
 
     def map_datatype(self, datatype: PS2Datatype):
@@ -91,16 +92,20 @@ class SQLWriterTableManager(SQLTableManager):
 
 
 
-    def define_column(self, column_spec: SpecColumn):
+    def define_column(self, column_spec: SpecColumn, indexed_column_names: list[str] = []):
         """
         Define a SQLAlchemy column based on the column spec.
         """
+        indexed_column_names = [name.lower() for name in indexed_column_names]
         required = column_spec.requirement == Requirement.Required
         col_type = self.map_datatype(column_spec.datatype)
+        indexed = column_spec.name.lower() in indexed_column_names
         kwargs = {
             'nullable': not required,
             'doc': column_spec.description
         }
+        if indexed:
+            kwargs['index'] = True
         return SQLColumn(column_spec.name, col_type, **kwargs)
 
 
@@ -119,8 +124,14 @@ class SQLWriterTableManager(SQLTableManager):
         # --- Main Table ---
         main_columns = []
 
+        main_table_column_names = [col.name.lower() for col in spec.main_table.columns]
+        indexed_column_names = [col.lower() for col in self.db_config.indexed_columns]
+        for col in indexed_column_names:
+            if col not in main_table_column_names:
+                raise ValueError(f"Indexed column {col} not found in main table columns.")
+
         for col in spec.main_table.columns:
-            main_columns.append(self.define_column(col))
+            main_columns.append(self.define_column(col, indexed_column_names))
 
         self.main_table = Table(
             CoreTables.MainTable, metadata,
