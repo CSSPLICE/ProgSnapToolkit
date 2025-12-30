@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 
 from abc import ABC, abstractmethod
 import os
@@ -42,14 +44,14 @@ class IOFactory(ABC):
         if ps2_spec is None:
             version = db_config.metadata.Version
             if version is None:
-                print("Warning: No PS2 spec version found in metadata. Using default spec.")
+                logger.warning("Warning: No PS2 spec version found in metadata. Using default spec.")
                 self.ps2_spec = PS2Versions.load_default()
             else:
                 try:
                     self.ps2_spec = PS2Versions.load_from_string(version)
                 except:
                     default_spec = PS2Versions.load_default()
-                    print(f"Warning: Unable to load PS2 spec for version '{version}'. Using default spec: {default_spec.version}.")
+                    logger.warning(f"Warning: Unable to load PS2 spec for version '{version}'. Using default spec: {default_spec.version}.")
                     self.ps2_spec = default_spec
 
     @abstractmethod
@@ -94,7 +96,7 @@ class SQLIOFactory(IOFactory):
         if url.lower().startswith("sqlite://"):
             file = url[10:]  # Remove 'sqlite://' prefix
             if not os.path.exists(file):
-                print(f"Warning: SQLite database file '{file}' does not exist.")
+                logger.warning(f"Warning: SQLite database file '{file}' does not exist.")
 
         self.engine = create_engine(db_config.sqlalchemy_url, echo=db_config.echo)
         try:

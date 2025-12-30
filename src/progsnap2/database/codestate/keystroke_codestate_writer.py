@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import textwrap
 import pandas as pd
 from pandas import DataFrame
@@ -44,7 +47,7 @@ class KeystrokeCodestateIO(CodeStateWriter):
                 insert = '' if pd.isna(row.InsertText) else row.InsertText
                 delete = '' if pd.isna(row.DeleteText) else row.DeleteText
                 if i > len(s):
-                    print(textwrap.dedent(f"""
+                    logger.warning(textwrap.dedent(f"""
                             SourceLocation {i} is out of bounds for current code length {len(s)} at
                             EventID {row[Cols.EventID]}.
                             This warning is expected for Edwards2021, but still indicates possible issues.

@@ -1,4 +1,5 @@
-
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 from typing import Optional
@@ -78,7 +79,7 @@ class PS2DataConfig(BaseModel):
             self.metadata = metadata_class(**self.metadata)
             return True
         except ValueError as e:
-            print(f"Metadata validation error: {e}")
+            logger.warning(f"Metadata validation error: {e}")
             return False
 
     @classmethod

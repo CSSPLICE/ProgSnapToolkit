@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import os
 import shutil
 from git import Repo
@@ -51,13 +54,13 @@ class GitCodeStateWriter(CodeStateWriter):
             try:
                 if os.path.isfile(item_path):
                     os.remove(item_path)
-                    print(f"Deleted file: {item_path}")
+                    logger.info(f"Deleted file: {item_path}")
                 elif os.path.isdir(item_path):
                     shutil.rmtree(item_path)
-                    print(f"Deleted folder: {item_path}")
+                    logger.info(f"Deleted folder: {item_path}")
             except Exception as e:
                 # TODO: Handle errors more gracefully
-                print(f"Error deleting '{item_path}': {e}")
+                logger.error(f"Error deleting '{item_path}': {e}")
 
         # Add the code state to the git repo
         for section in codestate.sections:
@@ -121,7 +124,7 @@ class GitCodeStateWriter(CodeStateWriter):
         directory = self.get_repo_dir(project_id, grouping_id)
         repo = self.get_repo(False, project_id, grouping_id)
         if repo is None:
-            print(f"Warning: No repository found at: {directory}")
+            logger.warning(f"Warning: No repository found at: {directory}")
             return None
 
         code_rows = []
@@ -130,7 +133,7 @@ class GitCodeStateWriter(CodeStateWriter):
             try:
                 commit = repo.commit(code_state_id)
             except Exception as e:
-                print(f"Warning: Commit '{code_state_id}' not found in repository at {directory}.")
+                logger.warning(f"Warning: Commit '{code_state_id}' not found in repository at {directory}.")
                 continue
 
             # Get all files in the commit

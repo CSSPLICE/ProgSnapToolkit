@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 
 from abc import ABC, abstractmethod
 from progsnap2.database.config import PS2DataConfig, PS2DataWriteConfig
@@ -215,9 +217,9 @@ class SQLWriterTableManager(SQLTableManager):
         Update the columns of a table in the database to match the new table.
         """
         for column in new_table.columns:
-            print(f"--- Checking column {column.name} in table {current_table.name}")
+            logger.info(f"--- Checking column {column.name} in table {current_table.name}")
             if column.name not in current_table.columns:
-                print(f"--- Adding column {column.name} to table {current_table.name}")
+                logger.info(f"--- Adding column {column.name} to table {current_table.name}")
                 # If the column is missing, add it to the existing table
                 query = f"""ALTER TABLE {current_table.name} ADD COLUMN {column.name} {column.type}"""
                 conn.execute(text(query))
@@ -237,11 +239,11 @@ class SQLWriterTableManager(SQLTableManager):
         conn.execute(self.metadata_table.delete())
 
         metadata_dict = self.metadata_values.model_dump()
-        print(f"Updating metadata values: {len(metadata_dict)}")
+        logger.info(f"Updating metadata values: {len(metadata_dict)}")
 
         # Insert new metadata values
         for property, value in metadata_dict.items():
-            print(f"Inserting metadata: {property} = {value}")
+            logger.info(f"Inserting metadata: {property} = {value}")
             conn.execute(self.metadata_table.insert().values(Property=property, Value=value))
 
         conn.commit()

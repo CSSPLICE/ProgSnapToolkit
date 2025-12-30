@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from progsnap2.analytics.ps2_dataset import PS2Dataset
 from progsnap2.spec.enums import CoreTables, MetadataProperties
 import sqlite3
@@ -15,11 +18,11 @@ def to_sqlite(dataset: PS2Dataset, path: str, replace: bool):
             metadata_df = dataset.get_metadata_table(False)
             _save_dataframe_to_sqlite(metadata_df, CoreTables.Metadata.value, conn)
         except NotImplementedError:
-            print("Warning: Metadata table not available in the dataset or config; skipping.")
+            logger.warning("Warning: Metadata table not available in the dataset or config; skipping.")
         for link_table_name in dataset.get_link_table_names():
             df = dataset.get_link_table(link_table_name)
             if not link_table_name.startswith('Link'):
-                print(f"Info: Renaming link table name '{link_table_name}' to 'Link{link_table_name}'.")
+                logger.info(f"Info: Renaming link table name '{link_table_name}' to 'Link{link_table_name}'.")
                 link_table_name = 'Link' + link_table_name
             _save_dataframe_to_sqlite(df, link_table_name, conn)
         try:
@@ -27,7 +30,7 @@ def to_sqlite(dataset: PS2Dataset, path: str, replace: bool):
             _save_dataframe_to_sqlite(codestates_df, CoreTables.CodeStatesTable.value, conn)
         except NotImplementedError:
             repr = dataset.get_metadata_property(MetadataProperties.CodeStateRepresentation.value)
-            print(f"Warning: Codestates not available for CodeStateRepresentation '{repr}'; skipping codestates table.")
+            logger.warning(f"Warning: Codestates not available for CodeStateRepresentation '{repr}'; skipping codestates table.")
         _save_dataframe_to_sqlite(dataset.get_main_table(), CoreTables.MainTable.value, conn)
     finally:
         conn.close()

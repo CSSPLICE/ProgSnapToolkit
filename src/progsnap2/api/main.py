@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 # server/main.py
 from enum import Enum
 import os
@@ -57,7 +60,7 @@ app.add_middleware(
 # But it seems like the headers don't get added here
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    print(f"Unhandled exception: {exc}")
+    logger.error(f"Unhandled exception: {exc}")
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal Server Error"},

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from progsnap2.analytics.ps2_dataset import Preprocessor
 from progsnap2.analytics.ps2_dataset import PS2Dataset
 import pandas as pd
@@ -87,7 +90,7 @@ class AddErrors2021Preprocessor(Preprocessor):
 
         subset = all_runs[(all_runs.Action == 'r') | (all_runs.OutputDestination == 'stderr')]
         for i, row in subset.iterrows():
-            # print(row.Action, row.Action == 'r')
+            # logger.info(row.Action, row.Action == 'r')
             if row.Action == 'r':
                 if current_run is not None:
                     error_type = pd.NA
@@ -100,8 +103,8 @@ class AddErrors2021Preprocessor(Preprocessor):
                             error_type = last_line[:colon_index].strip()
                         else:
                             if last_line not in ignorable_errors:
-                                print(f"Unrecognized error type: {last_line}")
-                                print(f"Full error message: {stderr}")
+                                logger.warning(f"Unrecognized error type: {last_line}")
+                                logger.warning(f"Full error message: {stderr}")
                             error_type = pd.NA
                     current_run[Cols.CompileMessageType] = error_type
                     current_run[Cols.CompileMessageData] = stderr

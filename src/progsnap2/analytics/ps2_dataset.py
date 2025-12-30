@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 
 # TODO: This should use the appropriate reader to get the data.
 # and apply appropriate preprocessing steps, e.g. sorting
@@ -66,7 +68,7 @@ class PS2Dataset:
         :return: The value of the metadata property, or None if not found.
         """
         if not hasattr(self.metadata_values, property_name):
-            print(f"Warning: Metadata property '{property_name}' not found.")
+            logger.warning(f"Warning: Metadata property '{property_name}' not found.")
             return None
         return getattr(self.metadata_values, property_name)
 
@@ -170,7 +172,7 @@ class SortPreprocessor(Preprocessor):
 
     def apply(self, dataset: PS2Dataset, main_table: DataFrame) -> DataFrame:
         if self.sort_column not in main_table.columns:
-            print(f"Warning: Column '{self.sort_column}' not found in the main table, skipping sorting.")
+            logger.warning(f"Warning: Column '{self.sort_column}' not found in the main table, skipping sorting.")
             return main_table
         if not dataset.get_metadata_property(MetadataProps.IsEventOrderingConsistent):
             return main_table
@@ -218,7 +220,7 @@ class TimePreprocessor(Preprocessor):
                     failed_timezone_message = f"Warning: Invalid timezone offset '{timezone_strings[i]}' for '{time_column_name}' value '{timestamp_strings[i]}'. Skipping future warnings."
                     timezone_strings[i] = ''
             if failed_timezone_message:
-                print(failed_timezone_message)
+                logger.warning(failed_timezone_message)
 
             timestamp_strings = timestamp_strings.str.cat(timezone_strings, sep='')
 
@@ -227,11 +229,11 @@ class TimePreprocessor(Preprocessor):
             try:
                 converted.append(datatypes.parse_timestamp(timestamp_strings.iloc[i]))
             except ValueError as e:
-                print(f"Warning: Could not parse '{time_column_name}' value '{timestamp_strings.iloc[i]}': {e}")
-                print("Column will use string values instead.")
+                logger.warning(f"Warning: Could not parse '{time_column_name}' value '{timestamp_strings.iloc[i]}': {e}")
+                logger.warning("Column will use string values instead.")
                 break
 
-        # print(f"Converted {len(converted)} values for '{time_column_name}' column.")
+        # logger.info(f"Converted {len(converted)} values for '{time_column_name}' column.")
 
         if len(converted) == len(timestamp_strings):
             main_table[time_column_name] = converted

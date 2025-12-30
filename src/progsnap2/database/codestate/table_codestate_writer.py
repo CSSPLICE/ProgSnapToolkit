@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import csv
 from sqlalchemy import insert, text
 from progsnap2.database.codestate.codestate_writer import ContextualCodeStateEntry, CodeStateWriter
@@ -166,7 +169,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         self._create_temp_id_table(temp_table_name, rows)
 
         if Cols.CodeStateSection in rows.columns:
-            print("Warning: CodeStateSection column is ignored when fetching subset of CodeStates.\n" \
+            logger.warning("Warning: CodeStateSection column is ignored when fetching subset of CodeStates.\n" \
             "All sections for matching CodeStateIDs will be returned.")
 
         query = f"""

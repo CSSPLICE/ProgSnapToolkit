@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 
 from typing import Final
 from pandas import DataFrame, Series
@@ -87,7 +89,7 @@ class TimeMetrics:
         delta_seconds = time_series_until_correct.diff().dt.total_seconds()
         negative_deltas = delta_seconds < 0
         if negative_deltas.any():
-            print("Warning: Negative time deltas found. This may indicate incorrect timestamps or data sorting issues.")
+            logger.warning("Warning: Negative time deltas found. This may indicate incorrect timestamps or data sorting issues.")
             delta_seconds = delta_seconds[~negative_deltas]  # Remove negative deltas
         n_breaks = (delta_seconds > self.break_gap).sum()
         non_break_seconds = delta_seconds[delta_seconds <= self.break_gap]

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from abc import ABC, abstractmethod
 import pandas as pd
 
@@ -44,7 +47,7 @@ class PS2Reader(ABC):
         except Exception:
             pass
         if metadata_table is None or metadata_table.empty:
-            print("Warning: Metadata table is empty or not found. Using default values.")
+            logger.warning("Warning: Metadata table is empty or not found. Using default values.")
             return MetadataValues()
 
         if 'Property' not in metadata_table.columns or 'Value' not in metadata_table.columns:

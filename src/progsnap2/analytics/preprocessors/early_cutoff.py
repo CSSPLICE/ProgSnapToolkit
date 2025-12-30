@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from progsnap2.spec.enums import MainTableColumns as Cols
 import matplotlib.pyplot as plt
 
@@ -10,19 +13,19 @@ def filter_before_time(main_table, time_cutoff, timestamp_col, filter_problems=T
     if not verbose:
         return data_subset
 
-    print("Semester start", main_table[timestamp_col].min())
-    print("Semester end", main_table[timestamp_col].max())
-    print("Early cutoff time", time_cutoff)
+    logger.info("Semester start", main_table[timestamp_col].min())
+    logger.info("Semester end", main_table[timestamp_col].max())
+    logger.info("Early cutoff time", time_cutoff)
     if Cols.AssignmentID in data_subset.columns:
-        print("Early Assignment IDs:", data_subset[Cols.AssignmentID].unique())
+        logger.info("Early Assignment IDs:", data_subset[Cols.AssignmentID].unique())
     if Cols.ProblemID in data_subset.columns:
-        print("Early Problem IDs:", data_subset[Cols.ProblemID].unique())
-    print("Total number of rows:", len(data_subset))
-    print("Percent of logs: ", len(data_subset) / len(main_table) * 100)
+        logger.info("Early Problem IDs:", data_subset[Cols.ProblemID].unique())
+    logger.info("Total number of rows:", len(data_subset))
+    logger.info("Percent of logs: ", len(data_subset) / len(main_table) * 100)
     if Cols.AssignmentID in data_subset.columns:
-        print(f"Assignments: {len(data_subset[Cols.AssignmentID].unique())} / {len(main_table[Cols.AssignmentID].unique())}")
+        logger.info(f"Assignments: {len(data_subset[Cols.AssignmentID].unique())} / {len(main_table[Cols.AssignmentID].unique())}")
     if Cols.ProblemID in main_table.columns:
-        print(f"Problems: {len(data_subset[Cols.ProblemID].unique())} / {len(main_table[Cols.ProblemID].unique())}")
+        logger.info(f"Problems: {len(data_subset[Cols.ProblemID].unique())} / {len(main_table[Cols.ProblemID].unique())}")
     return data_subset
 
 def filter_out_partial_problems(main_table, data_subset, time_cutoff, timestamp_col, cutoff=0.5, verbose=True):
@@ -43,7 +46,7 @@ def filter_out_partial_problems(main_table, data_subset, time_cutoff, timestamp_
     plt.title("Distribution of problem log percentages")
     plt.show()
 
-    print(f"Removing partial problems: {precluded_problems}")
-    print(f"This removed {100 - 100 * len(data_subset) / len_before:.2f}% of data")
+    logger.info(f"Removing partial problems: {precluded_problems}")
+    logger.info(f"This removed {100 - 100 * len(data_subset) / len_before:.2f}% of data")
 
     return data_subset

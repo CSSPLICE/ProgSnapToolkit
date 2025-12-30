@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 
 import os
 import pandas as pd
@@ -43,7 +45,7 @@ class CodeBenchRemoveSmallClassesPreprocessor(Preprocessor):
 
         class_counts = main_table[Cols.CourseSectionID].value_counts()
         invalid_class_ids = class_counts[class_counts < self.min_count].index
-        print(f"Removing classes with less than {self.min_count} submissions: {invalid_class_ids.tolist()}")
+        logger.info(f"Removing classes with less than {self.min_count} submissions: {invalid_class_ids.tolist()}")
         main_table = main_table[~main_table[Cols.CourseSectionID].isin(invalid_class_ids) & ~main_table[Cols.CourseSectionID].isna()]
         return main_table
 
@@ -77,7 +79,7 @@ class YAMLLinkURLPreprocessor(LinkTablePreprocessor):
                 return yaml.safe_load(file)
         except Exception as e:
             if not self.has_shown_warning:
-                print(f"Error reading YAML file at {url}: {e}. Hiding future warnings.")
+                logger.warning(f"Error reading YAML file at {url}: {e}. Hiding future warnings.")
                 self.has_shown_warning = True
             return None
 
