@@ -21,6 +21,7 @@ class SQLTableManager(ABC):
         self.table_names = self._metadata.tables.keys()
 
     def get_table(self, table_name: str) -> Table:
+        table_name = table_name.lower()
         if table_name not in self.table_names:
             raise ValueError(f"Table {table_name} does not exist in the database.")
         return self._metadata.tables[table_name]
@@ -142,6 +143,7 @@ class SQLWriterTableManager(SQLTableManager):
         path_datatype = self.map_datatype(PS2Datatype.RelativePath)
 
         for link_table in spec.link_tables:
+            link_table_name_lc = link_table.name.lower()
             columns = []
             # ID columns
             for id_col in link_table.id_column_names:
@@ -151,10 +153,10 @@ class SQLWriterTableManager(SQLTableManager):
                 columns.append(self.define_column(add_col))
 
             tbl = Table(
-                link_table.name, metadata,
+                link_table_name_lc, metadata,
                 *columns
             )
-            self.link_tables[link_table.name] = tbl
+            self.link_tables[link_table_name_lc] = tbl
 
         if self.metadata_values.CodeStateRepresentation == CodeStateRepresentation.Table:
             cols_etc = [

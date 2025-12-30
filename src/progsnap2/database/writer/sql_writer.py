@@ -32,7 +32,7 @@ class SQLWriter(DBWriter):
         return str(uuid.uuid4())
 
     def add_events(self, events: EventList) -> LogResult:
-        print("starting insert")
+        # print("starting insert")
 
         result = LogResult(True)
 
@@ -50,7 +50,7 @@ class SQLWriter(DBWriter):
         for event in events:
             try:
                 statement = insert(main_table).values(**event)
-                print("executing statement")
+                # print("executing statement")
                 self.conn.execute(statement)
             except Exception as e:
                 result.errors.append(f"Error inserting events: {e}")
@@ -58,7 +58,7 @@ class SQLWriter(DBWriter):
                 result.success = False
                 break
 
-        print("attempted to insert", result.success)
+        # print("attempted to insert", result.success)
         if result.success:
             self.conn.commit()
 
@@ -129,6 +129,13 @@ class SQLWriter(DBWriter):
                     continue
 
                 event[Cols.CodeStateID] = temp_codestate_id_map[temp_codestate_id]
+
+    # NOTE: No try/catch here - let exceptions propagate
+    def add_link_table_entry(self, table_name: str, entry: dict[str, any]) -> None:
+        link_table = self.context.table_manager.get_table(table_name)
+        statement = insert(link_table).values(**entry)
+        self.conn.execute(statement)
+        self.conn.commit()
 
     def initialize_database(self, force=False) -> None:
         if not force and self.context.table_manager.have_tables_been_created(self.conn):
