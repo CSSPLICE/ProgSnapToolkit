@@ -35,7 +35,7 @@ class PS2DataConfig(BaseModel):
     echo: bool = False
     pool_size: int = 10
     max_overflow: int = 0
-    pool_timeout: int = 2
+    pool_timeout: float = 2
 
     @property
     def is_sql_config(self) -> bool:
