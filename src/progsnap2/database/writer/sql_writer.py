@@ -50,20 +50,14 @@ class SQLWriter(DBWriter):
 
         main_table = self.context.table_manager.main_table
 
-        for event in events:
-            try:
-                statement = insert(main_table).values(**event)
-                # logger.info("executing statement")
-                self.session.execute(statement)
-            except Exception as e:
-                result.errors.append(f"Error inserting events: {e}")
-                self.session.rollback()
-                result.success = False
-                break
-
-        # logger.info("attempted to insert", result.success)
-        if result.success:
+        try:
+            stmt = insert(main_table)
+            self.session.execute(stmt, events)  # batch insert
             self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            result.errors.append(f"Error inserting events: {e}")
+            result.success = False
 
         return result
 
