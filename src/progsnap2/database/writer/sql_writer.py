@@ -9,7 +9,7 @@ from progsnap2.database.writer.db_writer import DBWriter, LogResult
 from progsnap2.database.sql_context import SQLContext
 from progsnap2.spec.codestate import BLANK_CODESTATE_ID
 from progsnap2.spec.datatypes import get_current_timestamp
-from progsnap2.spec.enums import MainTableColumns as Cols
+from progsnap2.spec.enums import CoreTables, MainTableColumns as Cols
 
 EventList = list[dict[str, any]]
 CodeStatesMap = dict[str, CodeStateEntry]
@@ -38,6 +38,8 @@ class SQLWriter(DBWriter):
         # logger.info("starting insert")
 
         result = LogResult(True)
+        if len(events) == 0:
+            return result
 
         for event in events:
             if Cols.EventID not in event:
@@ -49,6 +51,23 @@ class SQLWriter(DBWriter):
             result.warnings.extend([str(warning) for warning in self.context.event_validator.validate_event(event)])
 
         main_table = self.context.table_manager.main_table
+
+        all_columns = set(events[0].keys())
+        start_len = len(all_columns)
+        for event in events:
+            all_columns.update(event.keys())
+
+        # NOTE: If any columns have DEFAULT values in the table schema,
+        # they must be omitted from all_columns here to use the default.
+        # Currently none do.
+
+        if len(all_columns) != start_len:
+            # Ensure all events have all columns (missing columns get None)
+            # since SQLAlchemy insert needs dics to have the same set of keys
+            events = [
+                {k: event.get(k) for k in all_columns}
+                for event in events
+            ]
 
         try:
             stmt = insert(main_table)
