@@ -105,7 +105,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
 
     def __init__(self, context: SQLContext):
         super().__init__()
-        self.conn = context.conn
+        self.session = context.session
         self._table = None
         self.context = context
 
@@ -124,12 +124,12 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         table = self.get_table()
 
         # Execute as a transaction to ensure atomicity
-        with self.conn.begin():
+        with self.session.begin():
             # Check if the code state already exists in the database
             select_statement = table.select().where(
                 table.c.CodeStateID == codestate_id
             )
-            result = self.conn.execute(select_statement).fetchone()
+            result = self.session.execute(select_statement).fetchone()
             if result:
                 # TODO: It might be good to check that the stored code state matches
                 # the one we are trying to add
@@ -147,7 +147,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
                     raise ValueError("CodeStateSection should be None; this dataset does not support sections.")
 
                 statement = self._table.insert().values(**dict)
-                self.conn.execute(statement)
+                self.session.execute(statement)
 
     def do_codestates_have_sections(self):
         table = self.get_table()
@@ -156,7 +156,7 @@ class SQLTableCodeStateWriter(CodeStateWriter):
     def get_codestates_table(self):
         return pd.read_sql_table(
             CoreTables.CodeStates,
-            self.context.conn,
+            self.context.session,
         )
 
     def get_codestates_table_subset(self, rows: DataFrame) -> DataFrame:
@@ -180,16 +180,16 @@ class SQLTableCodeStateWriter(CodeStateWriter):
 
         # Join the temporary table with CodeStateIDs to fetch with
         # the CodeStates table.
-        return pd.read_sql(query, self.context.conn)
+        return pd.read_sql(query, self.context.session)
 
     # Note that right now, we never add sections because we match only
     # on CodeStateID and return all matches. Keeping this as an
     # option as it might be useful later.
     def _create_temp_id_table(self, temp_table_name, rows: DataFrame, add_sections = False) -> DataFrame:
-        conn = self.context.conn
+        session = self.context.session
 
         # Remove the table if it exists
-        conn.execute(text(f"DROP TABLE IF EXISTS {temp_table_name};"))
+        session.execute(text(f"DROP TABLE IF EXISTS {temp_table_name};"))
 
         create_query = f"CREATE TEMP TABLE {temp_table_name} ({Cols.CodeStateID} TEXT"
         if add_sections:
@@ -197,16 +197,16 @@ class SQLTableCodeStateWriter(CodeStateWriter):
         create_query += ");"
 
         # Create a temporary table
-        conn.execute(text(create_query))
+        session.execute(text(create_query))
 
         # Insert rows
         if add_sections:
-            conn.execute(
+            session.execute(
                 text(f"INSERT INTO {temp_table_name} ({Cols.CodeStateID}, {Cols.CodeStateSection}) VALUES (:id, :section);"),
                 [{"id": str(id), "section": str(section)} for id, section in rows[[Cols.CodeStateID, Cols.CodeStateSection]].itertuples(index=False)]
             )
         else:
-            conn.execute(
+            session.execute(
                 text(f"INSERT INTO {temp_table_name} ({Cols.CodeStateID}) VALUES (:id);"),
                 [{"id": str(id)} for id in rows[Cols.CodeStateID].tolist()]
             )

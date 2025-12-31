@@ -9,6 +9,7 @@ from progsnap2.spec.spec_definition import ProgSnap2Spec
 from datetime import datetime
 from sqlalchemy import Connection, Engine, Index, MetaData, Table, Column as SQLColumn, Integer, String, Float, Enum as SQLEnum, UniqueConstraint, inspect, text
 from sqlalchemy.dialects.sqlite import DATETIME
+from sqlalchemy.orm import Session
 
 from progsnap2.spec.datatypes import DBStringLength, PS2Datatype
 from progsnap2.spec.spec_definition import ProgSnap2Spec, Property, Requirement, Column as SpecColumn
@@ -55,12 +56,14 @@ class SQLWriterTableManager(SQLTableManager):
         """
         return self.codestates_table is not None
 
-    def have_tables_been_created(self, conn: Connection) -> bool:
+    def have_tables_been_created(self, session: Session) -> bool:
         """
         Check if tables have already been created.
         Note: this does not check whether tables are out of date.
         """
-        metadata = inspect(conn.engine)
+        # Typically a bad practice to get the connection, but this is only
+        # called one at load time, so should be ok...
+        metadata = inspect(session.connection().engine)
         return metadata.has_table(self.metadata_table.name) and metadata.has_table(self.main_table.name)
 
 
@@ -179,16 +182,20 @@ class SQLWriterTableManager(SQLTableManager):
 
         return metadata
 
-    def create_tables(self, conn: Connection):
-        self._metadata.create_all(conn)
+    def create_tables(self, session: Session):
+        # Creates a connection, since we need metadata
+        # Ok, since we only call it once
+        self._metadata.create_all(session.connection())
 
-    def update_tables(self, conn: Connection):
+    def update_tables(self, session: Session):
         """
         Update the tables in the database to match the current spec.
         Learns the current structure from the connection, and then
         iterates through each table defined in our spec-defined metadata
         and adds any missing columns. Should not delete tables or columns.
         """
+
+        conn = session.connection()
 
         # Get the current structure of the database
         current_metadata = MetaData()
@@ -231,12 +238,12 @@ class SQLWriterTableManager(SQLTableManager):
                     Please update the database manually."""
                 )
 
-    def update_metadata_values(self, conn: Connection):
+    def update_metadata_values(self, session: Session):
         """
         Update the metadata values in the database.
         """
         # Clear existing metadata values
-        conn.execute(self.metadata_table.delete())
+        session.execute(self.metadata_table.delete())
 
         metadata_dict = self.metadata_values.model_dump()
         logger.info(f"Updating metadata values: {len(metadata_dict)}")
@@ -244,6 +251,6 @@ class SQLWriterTableManager(SQLTableManager):
         # Insert new metadata values
         for property, value in metadata_dict.items():
             logger.info(f"Inserting metadata: {property} = {value}")
-            conn.execute(self.metadata_table.insert().values(Property=property, Value=value))
+            session.execute(self.metadata_table.insert().values(Property=property, Value=value))
 
-        conn.commit()
+        session.commit()

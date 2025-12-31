@@ -23,8 +23,8 @@ class SQLWriter(DBWriter):
         self.codestate_writer: CodeStateWriter = codestate_writer
 
     @property
-    def conn(self):
-        return self.context.conn
+    def session(self):
+        return self.context.session
 
     def add_server_timestamps(self, events: EventList) -> None:
         for event in events:
@@ -54,16 +54,16 @@ class SQLWriter(DBWriter):
             try:
                 statement = insert(main_table).values(**event)
                 # logger.info("executing statement")
-                self.conn.execute(statement)
+                self.session.execute(statement)
             except Exception as e:
                 result.errors.append(f"Error inserting events: {e}")
-                self.conn.rollback()
+                self.session.rollback()
                 result.success = False
                 break
 
         # logger.info("attempted to insert", result.success)
         if result.success:
-            self.conn.commit()
+            self.session.commit()
 
         return result
 
@@ -137,14 +137,14 @@ class SQLWriter(DBWriter):
     def add_link_table_entry(self, table_name: str, entry: dict[str, any]) -> None:
         link_table = self.context.table_manager.get_table(table_name)
         statement = insert(link_table).values(**entry)
-        self.conn.execute(statement)
-        self.conn.commit()
+        self.session.execute(statement)
+        self.session.commit()
 
     def initialize_database(self, force=False) -> None:
-        if not force and self.context.table_manager.have_tables_been_created(self.conn):
+        if not force and self.context.table_manager.have_tables_been_created(self.session):
             return
-        self.context.table_manager.create_tables(self.conn)
-        self.context.table_manager.update_metadata_values(self.conn)
+        self.context.table_manager.create_tables(self.session)
+        self.context.table_manager.update_metadata_values(self.session)
 
     def update_database(self):
-        self.context.table_manager.update_tables(self.conn)
+        self.context.table_manager.update_tables(self.session)

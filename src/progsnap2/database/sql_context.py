@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass, field
-from sqlalchemy import Connection, MetaData
+from sqlalchemy.orm import Session
 
 from progsnap2.database.config import PS2DataConfig
 from progsnap2.database.sql_table_manager import SQLTableManager, SQLWriterTableManager
@@ -19,5 +19,5 @@ class IOContext:
 
 @dataclass
 class SQLContext(IOContext):
-    conn: Connection
+    session: Session
     table_manager: SQLTableManager

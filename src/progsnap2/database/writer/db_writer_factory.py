@@ -8,7 +8,8 @@ from progsnap2.database.codestate.directory_codestate_writer import DirectoryCod
 from progsnap2.database.codestate.table_codestate_writer import CSVTableCodeStateWriter, SQLTableCodeStateWriter
 from progsnap2.database.codestate.keystroke_codestate_writer import KeystrokeCodestateIO
 
-from sqlalchemy import Connection, create_engine, inspect
+from sqlalchemy import create_engine, inspect
+from sqlalchemy.orm import Session
 from progsnap2.database.config import PS2DataConfig, PS2DataWriteConfig
 from progsnap2.database.reader.csv_reader import CSVReader
 from progsnap2.database.reader.sql_reader import SQLReader
@@ -98,7 +99,13 @@ class SQLIOFactory(IOFactory):
             if not os.path.exists(file):
                 logger.warning(f"Warning: SQLite database file '{file}' does not exist.")
 
-        self.engine = create_engine(db_config.sqlalchemy_url, echo=db_config.echo)
+        self.engine = create_engine(
+            db_config.sqlalchemy_url,
+            echo=db_config.echo,
+            pool_size=db_config.pool_size,
+            max_overflow=db_config.max_overflow,
+            pool_timeout=db_config.pool_timeout,
+        )
         try:
             self.table_names = inspect(self.engine).get_table_names()
         except Exception:
@@ -120,20 +127,22 @@ class SQLIOFactory(IOFactory):
             self.table_manager = SQLReaderTableManager(self.engine)
         return SQLReaderContextManager(self)
 
-# Use a context manager to handle the connection lifecycle
+# Use a context manager to handle the session lifecycle
 class SQLIOContextManager(ABC):
     def __init__(self, factory: SQLIOFactory):
         self.factory = factory
-        self.conn = None
+        self.session = None
 
     @abstractmethod
     def __enter__(self):
         pass
 
     def _get_context_and_codestate_io(self):
-        self.conn = self.factory.engine.connect()
+        # Could use a sessionmaker if I have more config
+        # or need to create sessions in multiple places
+        self.session = Session(bind=self.factory.engine)
         context = SQLContext(
-            conn=self.conn,
+            session=self.session,
             table_manager=self.factory.table_manager,
             data_config=self.factory.db_config,
             ps2_spec=self.factory.ps2_spec
@@ -142,8 +151,8 @@ class SQLIOContextManager(ABC):
         return context, codestate_io
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.conn:
-            self.conn.close()
+        if self.session:
+            self.session.close()
 
 class SQLReaderContextManager(SQLIOContextManager):
     def __init__(self, factory: SQLIOFactory):

@@ -3,10 +3,12 @@ from progsnap2.database.codestate.codestate_writer import CodeStateWriter
 from progsnap2.database.reader.ps2_reader import PS2Reader
 from progsnap2.database.sql_context import SQLContext
 
+from sqlalchemy.orm import Session
+
 import pandas as pd
 from pandas import DataFrame
 
-from sqlalchemy import Connection, select
+from sqlalchemy import select
 
 from progsnap2.database.sql_table_manager import SQLTableManager
 from progsnap2.spec.enums import CoreTables
@@ -21,8 +23,8 @@ class SQLReader(PS2Reader):
     def get_table_manager(self) -> SQLTableManager:
         return self.context.table_manager
 
-    def get_conn(self) -> Connection:
-        return self.context.conn
+    def get_session(self) -> Session:
+        return self.context.session
 
     def _get_table(self, table_name: str) -> DataFrame:
         return pd.read_sql_table(
