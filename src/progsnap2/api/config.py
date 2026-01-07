@@ -19,6 +19,9 @@ class PS2APIConfig(BaseModel):
     add_server_timestamps: bool = True
     cors_config: CORSConfig = CORSConfig()
 
+    # Hard-coded list of API keys for testing purposes
+    testing_api_keys: list[str] = []
+
     @classmethod
     def from_yaml(cls, yaml_path: str, ps2_spec: ProgSnap2Spec) -> "PS2APIConfig":
         with open(yaml_path, "r", encoding='utf-8') as file:
