@@ -52,16 +52,14 @@ class SQLWriter(DBWriter):
 
         main_table = self.context.table_manager.main_table
 
-        all_columns = set(events[0].keys())
-        start_len = len(all_columns)
-        for event in events:
-            all_columns.update(event.keys())
+        all_columns = set().union(*(event.keys() for event in events))
+        needs_update = any(event.keys() != all_columns for event in events)
 
         # NOTE: If any columns have DEFAULT values in the table schema,
         # they must be omitted from all_columns here to use the default.
         # Currently none do.
 
-        if len(all_columns) != start_len:
+        if needs_update:
             # Ensure all events have all columns (missing columns get None)
             # since SQLAlchemy insert needs dics to have the same set of keys
             events = [
