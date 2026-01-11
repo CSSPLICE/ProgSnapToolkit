@@ -105,6 +105,7 @@ class SQLIOFactory(IOFactory):
             pool_size=db_config.pool_size,
             max_overflow=db_config.max_overflow,
             pool_timeout=db_config.pool_timeout,
+            pool_recycle=db_config.pool_recycle
         )
         try:
             self.table_names = inspect(self.engine).get_table_names()
