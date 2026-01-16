@@ -11,7 +11,7 @@ from sqlalchemy import Connection, Engine, Index, MetaData, Table, Column as SQL
 from sqlalchemy.dialects.sqlite import DATETIME
 from sqlalchemy.orm import Session
 
-from progsnap2.spec.datatypes import DBStringLength, PS2Datatype
+from progsnap2.spec.datatypes import MAX_STRING_LENGTH, DBStringLength, PS2Datatype
 from progsnap2.spec.spec_definition import ProgSnap2Spec, Property, Requirement, Column as SpecColumn
 from progsnap2.spec.enums import CodeStatesTableColumns as CodeCols, MainTableColumns as Cols, CoreTables
 
@@ -80,8 +80,7 @@ class SQLWriterTableManager(SQLTableManager):
                 return String(self.db_config.path_str_length)
 
         if datatype.python_type == str:
-            # If the datatype is a string but has no max length, use Text
-            return Text
+            return Text(MAX_STRING_LENGTH)
 
         # Convert python type to SQL type
         type_map = {

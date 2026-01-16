@@ -3,12 +3,12 @@ logger = logging.getLogger(__name__)
 
 from enum import Enum
 import uuid
-from sqlalchemy import insert
+from sqlalchemy import Table, insert
 from progsnap2.database.codestate.codestate_writer import CodeStateEntry, CodeStateWriter, ContextualCodeStateEntry
 from progsnap2.database.writer.db_writer import DBWriter, LogResult
 from progsnap2.database.sql_context import SQLContext
 from progsnap2.spec.codestate import BLANK_CODESTATE_ID
-from progsnap2.spec.datatypes import get_current_timestamp
+from progsnap2.spec.datatypes import MAX_STRING_LENGTH, get_current_timestamp
 from progsnap2.spec.enums import CoreTables, MainTableColumns as Cols
 
 EventList = list[dict[str, any]]
@@ -145,11 +145,28 @@ class SQLWriter(DBWriter):
                 event[Cols.CodeStateID] = temp_codestate_id_map[temp_codestate_id]
 
     # NOTE: No try/catch here - let exceptions propagate
-    def add_link_table_entry(self, table_name: str, entry: dict[str, any]) -> None:
+    def add_link_table_entry(self, table_name: str, entry: dict[str, any], truncate = False) -> None:
         link_table = self.context.table_manager.get_table(table_name)
+        if truncate:
+            entry = self.truncate_entry(link_table, entry)
         statement = insert(link_table).values(**entry)
         self.session.execute(statement)
         self.session.commit()
+
+    def truncate_entry(self, table: Table, entry: dict[str, any]) -> dict[str, any]:
+        entry = entry.copy()
+        truncation_suffix = "...[TRUNCATED]"
+        for key in entry:
+            column = table.c.get(key)
+            if column is not None and hasattr(column.type, 'length') and isinstance(entry[key], str):
+                max_length = column.type.length
+                if max_length is None:
+                    max_length = MAX_STRING_LENGTH
+                print(f"Column {key} has max length {max_length}")
+                if isinstance(max_length, int) and len(entry[key]) > max_length:
+                    logger.warning(f"Truncating entry for column {key} from {len(entry[key])} to {max_length} characters.")
+                    entry[key] = entry[key][:max_length - len(truncation_suffix)] + truncation_suffix
+        return entry
 
     def initialize_database(self, force=False) -> None:
         if not force and self.context.table_manager.have_tables_been_created(self.session):

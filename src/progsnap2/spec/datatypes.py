@@ -13,6 +13,9 @@ TIMESTAMP_FORMATS = [
     BASE_TIMESTAMP_FORMAT + FRACTIONAL_SECONDS_FORMAT,
 ]
 
+# max str length for MediumText in MySQL (assumes worst case 4 bytes per char)
+MAX_STRING_LENGTH = 4_194_303
+
 def get_current_timestamp(time = None) -> str:
     """
     Get the current timestamp in the appropriate format.
