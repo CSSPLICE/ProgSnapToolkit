@@ -162,7 +162,7 @@ class SQLWriter(DBWriter):
                 max_length = column.type.length
                 if max_length is None:
                     max_length = MAX_STRING_LENGTH
-                print(f"Column {key} has max length {max_length}")
+                # print(f"Column {key} has max length {max_length}")
                 if isinstance(max_length, int) and len(entry[key]) > max_length:
                     logger.warning(f"Truncating entry for column {key} from {len(entry[key])} to {max_length} characters.")
                     entry[key] = entry[key][:max_length - len(truncation_suffix)] + truncation_suffix
