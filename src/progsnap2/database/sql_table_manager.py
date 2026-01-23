@@ -232,6 +232,10 @@ class SQLWriterTableManager(SQLTableManager):
                 query = f"""ALTER TABLE {current_table.name} ADD COLUMN {column.name} {column.type}"""
                 conn.execute(text(query))
             elif str(column.type) != str(current_table.columns[column.name].type):
+                if str(column.type).startswith("TEXT(") or str(column.type).startswith("VARCHAR("):
+                    logger.warning(f"""Cannot verify TEXT length changes. Please verify manually if needed:
+                                   {column.type} (new) != {current_table.columns[column.name].type} (old).""")
+                    continue
                 # If the column type is different, alter the column
                 raise NotImplementedError(
                     f"""Column type change not implemented for {column.name} in {current_table.name}.
