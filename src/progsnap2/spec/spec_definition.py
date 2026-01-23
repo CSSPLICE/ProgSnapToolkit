@@ -106,6 +106,7 @@ class LinkTableSpec(BaseModel):
     description: str = None
     id_column_names: List[str]
     additional_columns: List[Column]
+    unique_constraints: List[List[str]] = []
 
 
 class ProgSnap2Spec(BaseModel):

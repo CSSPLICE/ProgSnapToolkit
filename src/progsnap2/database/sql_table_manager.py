@@ -155,6 +155,8 @@ class SQLWriterTableManager(SQLTableManager):
             # Additional columns
             for add_col in link_table.additional_columns:
                 columns.append(self.define_column(add_col))
+            for uq_cols in link_table.unique_constraints:
+                columns.append(UniqueConstraint(*uq_cols, name=f"uq_{link_table_name_lc}_{'_'.join(uq_cols)}"))
 
             tbl = Table(
                 link_table_name_lc, metadata,
