@@ -64,7 +64,10 @@ class SQLWriterTableManager(SQLTableManager):
         # Typically a bad practice to get the connection, but this is only
         # called one at load time, so should be ok...
         metadata = inspect(session.connection().engine)
-        return metadata.has_table(self.metadata_table.name) and metadata.has_table(self.main_table.name)
+        return metadata.has_table(self.metadata_table.name) \
+            and metadata.has_table(self.main_table.name) \
+            and (not self.has_codestates_table() or metadata.has_table(self.codestates_table.name)) \
+            and all([metadata.has_table(tbl.name) for tbl in self.link_tables.values()])
 
 
     def map_datatype(self, datatype: PS2Datatype):
