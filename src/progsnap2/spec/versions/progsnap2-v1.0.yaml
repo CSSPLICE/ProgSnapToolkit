@@ -10,7 +10,7 @@ enum_types:
       - name: Git
         description: CodeStates will be stored in Git repositories, with commit hashes used as CodeStateIDs, organized by SubjectID and ProjectID.
       - name: Keystroke
-        description: Rather than directly storing Codestates, the MainTable will contain InsertText and DeleteText columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed.
+        description: Rather than directly storing Codestates, the MainTable will contain InsertText and DeleteText/DeleteLength columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed.
 
   - name: EventInitiator
     values:
@@ -315,6 +315,12 @@ main_table:
 
         Also note that CodeStateSections should not be used for CodeStates in the Table format, as all table data is contained in the same file.
 
+    - name: CopiedText
+      requirement: EventSpecific
+      datatype: String
+      description: |
+        The text copied to the clipboard from a code editor.
+
     - name: DestinationCodeStateSection
       requirement: EventSpecific
       datatype: SourceLocation
@@ -468,6 +474,12 @@ main_table:
       description: |
         The text deleted by this File.Delete event, if any.
 
+    - name: DeleteLength
+      requirement: EventSpecific
+      datatype: Integer
+      description: |
+        The length of the text deleted by this File.Delete event, if any. Can be used in place of DeleteText.
+
   event_types:
     - name: Session.Start
       description: Marks the start of a work session.
@@ -541,7 +553,7 @@ main_table:
         - EventInitiator
 
     - name: File.Edit
-      description: Indicates that the contents of a file were edited.
+      description: Indicates that the contents of a file were edited. If a ParentEventID is provided, this indicates that multiple edits took place in the same action.
       required_columns:
         - CodeStateSection
         - EditType
@@ -550,6 +562,8 @@ main_table:
         - SourceLocation
         - InsertText
         - DeleteText
+        - DeleteLength
+        - ParentEventID
 
     - name: File.Focus
       description: Indicates that a file was selected by the user within the user interface.
@@ -557,6 +571,16 @@ main_table:
         - CodeStateSection
       optional_columns:
         - EventInitiator
+
+    - name: File.CopyText
+      description: |
+        Indicates that the user has copied the CopiedText from an open code document to the clipboard. Optionally includes the document (CodeStateSection) and file location (SourceLocation) from which the text was copied.
+        Note that for privacy reasons this even should **not** fire when a user copies text outside of the code editor, as this could contain personal information. However, if extern text is pasted into an editor, this can be indicated by setting EditType attribute to Paste.
+      required_columns:
+        - CopiedText
+      optional_columns:
+        - CodeStateSection
+        - SourceLocation
 
     - name: Compile
       description: Indicates an attempt to compile all or part of the code.
@@ -655,15 +679,17 @@ main_table:
         - InterventionMessage
 
 
-link_tables:
-  - name: LinkSubject
-    id_column_names:
-      - SubjectID
-    additional_columns:
-      - name: MidtermExamScore
-        requirement: Optional
-        datatype: Real
-        description: |
-          The student's score between 0-1 on the midterm exam.
-    description: |
-      A link table with additional information about each student.
+link_tables: []
+
+# Example LinkTable:
+  # - name: LinkSubject
+  #   id_column_names:
+  #     - SubjectID
+  #   additional_columns:
+  #     - name: MidtermExamScore
+  #       requirement: Optional
+  #       datatype: Real
+  #       description: |
+  #         The student's score between 0-1 on the midterm exam.
+  #   description: |
+  #     A link table with additional information about each student.

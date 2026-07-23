@@ -13,7 +13,7 @@ def make_markdown_table(headers, rows):
 
     # Helper to format a row
     def format_row(row):
-        return "| " + " | ".join(str(cell).ljust(width) for cell, width in zip(row, col_widths)) + " |"
+        return "| " + " | ".join(str(cell.replace("\n", " ")) for cell in row)
 
     # Build the table
     table = [format_row(headers)]
