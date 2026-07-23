@@ -16,7 +16,7 @@ _base_name = "codebench"
 _base_config = AnalyticsConfig(
     name=_base_name,
     create_data_config=_create_data_config,
-    granularity=Granularity.Edit,
+    granularity=Granularity.Keystroke,
 
     primary_timestamp_column=Cols.ServerTimestamp,
     main_table_preprocessors=[
