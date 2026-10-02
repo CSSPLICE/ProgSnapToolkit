@@ -106,13 +106,6 @@ class MainTableColumns(str, Enum):
     We recommend that CourseIDs be at least somewhat anonymized, to avoid making student data identifiable.
     """
 
-    CourseSectionID = 'CourseSectionID'
-    """
-    Courses are often split up into smaller sections of students who primarily interact with each other and a specific TA. If applicable, each section should be given a distinct ID (unique from other sections in the given course and other courses). CourseSections should not share IDs across terms.
-
-    We recommend that CourseSectionIDs be at least somewhat anonymized, to avoid making student data identifiable.
-    """
-
     TermID = 'TermID'
     """
     The term in which the course took place. Can be written as needed, but we recommend the format '<Semester> <Year>'; for example, 'Spring 2018'.
@@ -123,21 +116,6 @@ class MainTableColumns(str, Enum):
     CodeStates are often associated with a specific assignment that is composed of one or more programming problems. Each unique assignment must be given a distinct ID from other assignments in the associated course and other courses. If an assignment is identical to an assignment in a previous term of the course or another course, they should be given the same ID, but any changes in the assignment should result in a changed ID.
 
     If the CodeState represents free-form student work not associated with a specific assignment or problem, this value should be empty. Stand-alone problems also do not need to be associated with assignments.
-    """
-
-    ProblemID = 'ProblemID'
-    """
-    The identifier for the programming problem associated with the event. Each unique problem must have its own identifier that is distinct from other identifiers in the same column that correspond to different problems. If a record specifying a ProblemID also specifies an AssignmentID, it means that the problem is part of the specified assignment. There is no requirement that problems are associated with an assignment: for example, a standalone practice problem might not be considered to be part of an assignment.
-    """
-
-    Attempt = 'Attempt'
-    """
-    If a student attempts a problem more than once, this value is used to identify which attempt they're on. It should start at 1, then increase by 1 on each following attempt.
-    """
-
-    ExperimentalCondition = 'ExperimentalCondition'
-    """
-    If this data was logged as part of an experiment, this column can be used to specify the experimental condition that the event took place in. Condition names must be consistent for events in the same condition, and (if possible) distinct between different experiments. This can be accomplished by assigning each experiment in the dataset a distinct name. An example condition string is "02/18 Parsons Problem Study: Control"; this establishes the condition (control case), the study content (parsons problems), and when the study took place (February 2018).
     """
 
     LoggingErrorID = 'LoggingErrorID'
@@ -162,11 +140,6 @@ class MainTableColumns(str, Enum):
     A project is a collection of source files that can be opened and closed (in Project.* events). Note that a project may be distinct from an assignment or problem. For example, one assignment might extend another, in which case the student will load the same project and continue working on it.
 
     Data producers should only generate Project.* events and ProjectID values if the underlying data source has an explicit concept of "project".
-    """
-
-    ResourceID = 'ResourceID'
-    """
-    Often students access resources while working on problems. Example resources include API documentation, online textbooks, and demo videos. In a dataset which logs student access to resources, each resource must be assigned a distinct ID. If resources are not changed across terms, their IDs should be reused.
     """
 
     CodeStateSection = 'CodeStateSection'
@@ -212,45 +185,9 @@ class MainTableColumns(str, Enum):
     This value indicates the type of edit which caused the file to change. Specific values are described in the table below. Additional custom values should be documented in the README.md
     """
 
-    CompileResult = 'CompileResult'
-    """
-    Compile events can either result in an error, a warning, or a general success.
-    """
-
-    CompileMessageType = 'CompileMessageType'
-    """
-    The type/ID of compile message provided. If no error or warning was given, the string “Success” should be used. The types of errors and warnings used will otherwise vary by language; for example, a Python compile message type might be a ‘SyntaxError' or an ‘IndentationError'.
-    """
-
-    CompileMessageData = 'CompileMessageData'
-    """
-    The specific compiler message shown to the student.
-    """
-
     SourceLocation = 'SourceLocation'
     """
     A SourceLocation value represents a location or region within a source file, associated with a compiler diagnostic, static analysis warning, or other message about program source. It can also describe the location of an edit in source code during File.Edit events. Note that due to the large number of ways file contents could change as a result of a File.Edit event, the SourceLocation value associated with a File.Edit event (if any) should be considered to be a “hint” regarding the location of the change(s) represented by the event. The true change corresponding to a File.Edit event is indicated by the changes to the event's CodeState relative to the previous CodeState.
-    """
-
-    ExecutionID = 'ExecutionID'
-    """
-    This ID value is used to group Run.Test events that were part of the same overall test execution. For example, if multiple unit tests were executed, resulting in one Run.Test event for each unit test, all of the Run.Test events in the group should share a common ExecutionID value.
-
-    If the code execution is associated with a submission, then the Submit event should have an ExecutionID value, and the associated Run.Test, Debug.Test, and/or Run.Program events should share the same ExecutionID value.
-
-    For consistency, this ID value may also be specified for Run.Program events.
-    """
-
-    TestID = 'TestID'
-    """
-    An ID indicating which test case is associated with the event. If desired, a link table may map IDs to further information about the individual test cases. Note that TestID values may be human-readable: for example, the names of JUnit tests could be used as TestID values, but they should still be globally unique (not reused across problems).
-    """
-
-    ExecutionResult = 'ExecutionResult'
-    """
-    Run.Program events can result in Success (the program runs fully to completion), Timeout (the program's execution is interrupted by the user or the system), or Error (the program execution is terminated by a compiler or runtime error).
-
-    Run.Test events can result in Success (the test passes), Timeout (the test failed to complete in the allotted time), Error (the test failed due to a fatal runtime exception), or TestFailed (the test produces the incorrect output). Note that assertion errors should be classified as TestFailed, not Error.
     """
 
     Score = 'Score'
@@ -269,9 +206,9 @@ class MainTableColumns(str, Enum):
     Note also that Run.Test events and potentially even Submit events could omit the Score value if they are intended exclusively as extra credit. Also, events can omit the Score value if it is not possible for a score to be calculated immediately (as is the case for creative or manually graded problems). When a manual grade is provided, an EarnedGrade Intervention should be used to log the grade.
     """
 
-    ExtraCreditScore = 'ExtraCreditScore'
+    ScoreDetails = 'ScoreDetails'
     """
-    An ExtraCreditScore value ranges between 0.0 and 1.0, and indicates the degree to which a single test (in the case of Run.Test events) or submission (in the case of Submit events) satisfies extra credit criteria. This column should not contain any value for Run.Test and Submit events that have no extra credit criteria.
+    Details about how the score was calculated, if not present in a LinkTable.
     """
 
     ProgramInput = 'ProgramInput'
@@ -295,23 +232,6 @@ class MainTableColumns(str, Enum):
     ProgramErrorOutput = 'ProgramErrorOutput'
     """
     Programs often produce error output at the end of a run or test. The ProgramErrorOutput value specifies the URL which records the program's error channel output. The URL will typically refer to an “internal” file within the dataset's Resources directory. Note that ProgramErrorOutput is intended to capture the “error” output channel of the program, i.e., stderr in C, cerr in C++, System.err in Java, etc.
-    """
-
-    InterventionCategory = 'InterventionCategory'
-    """
-    An Intervention event is an interaction with the subject initiated during the programming process; for example, showing the students a targeted feedback message when they fail a specific test case. We include common intervention categories here, but new ones with names starting with the prefix “X-” may be used. Common interventions should be recommended for inclusion in future versions of ProgSnap 2.
-
-    Note that Compile and Run events are not interventions; these events are ubiquitous enough that they have been given their own event types.
-    """
-
-    InterventionType = 'InterventionType'
-    """
-    System-level information about the type of intervention being performed. For feedback, this might be the type of error or code state that was detected; for CodeHighlight, this might be the starting and ending coordinates of the highlighted code. This can be organized freely by the logger, but the format should be consistent within datasets, and should state the information as succinctly as possible.
-    """
-
-    InterventionMessage = 'InterventionMessage'
-    """
-    The actual intervention message shown to the student, when applicable. If no message is shown but a visual effect occurs, the effect should be described (possibly using a dataset-specific coding scheme).
     """
 
     InsertText = 'InsertText'
@@ -367,44 +287,44 @@ class EventType(str, Enum):
     Note that for privacy reasons this even should **not** fire when a user copies text outside of the code editor, as this could contain personal information. However, if extern text is pasted into an editor, this can be indicated by setting EditType attribute to Paste.
     """
 
-    Compile = 'Compile'
-    """Indicates an attempt to compile all or part of the code."""
-    CompileError = 'Compile.Error'
-    """Represents a compilation error and its associated diagnostic."""
-    CompileWarning = 'Compile.Warning'
-    """Represents a compilation warning and its associated diagnostic."""
     Submit = 'Submit'
     """Indicates that code was submitted to the system."""
-    RunProgram = 'Run.Program'
-    """Indicates a program execution and its associated input and/or output."""
-    RunTest = 'Run.Test'
-    """Indicates execution of a test and its associated input and/or output."""
-    DebugProgram = 'Debug.Program'
-    """Indicates a debug execution of the program and its associated input and/or output."""
-    DebugTest = 'Debug.Test'
-    """Indicates a debug execution of a test and its associated input and/or output."""
-    ResourceView = 'Resource.View'
-    """Indicates that a resource (typically a learning resource of some type) was viewed."""
-    Intervention = 'Intervention'
-    """Indicates that an intervention such as a hint was done."""
+    LoggingError = 'LoggingError'
+    """Indicates that an error occurred when logging."""
     def __str__(self):
         return self.value
 
 
 class LinkTableNames(str, Enum):
     """Defined LinkTables"""
-    LinkSubject = 'linksubject'
+    LinkLoggingError = 'LinkLoggingError'
     """
-    A link table with additional information about each student.
+    A link table that records loggin error details.
+    """
+
+    LinkAssignmentMap = 'LinkAssignmentMap'
+    """
+    A link table that maps CodeStateSections
     """
 
     def __str__(self):
         return self.value
 
 
-class LinkSubjectColumns(str, Enum):
+class LinkLoggingErrorColumns(str, Enum):
+    LoggingErrorID = 'LoggingErrorID'
+    Error = 'Error'
+    RequestBody = 'RequestBody'
+    def __str__(self):
+        return self.value
+
+
+class LinkAssignmentMapColumns(str, Enum):
     SubjectID = 'SubjectID'
-    MidtermExamScore = 'MidtermExamScore'
+    AssignmentID = 'AssignmentID'
+    CodeStateSection = 'CodeStateSection'
+    LastValidTimestamp = 'LastValidTimestamp'
+    CodeStateID = 'CodeStateID'
     def __str__(self):
         return self.value
 
@@ -417,7 +337,7 @@ class CodeStateRepresentation(str, Enum):
     Git = 'Git'
     """CodeStates will be stored in Git repositories, with commit hashes used as CodeStateIDs, organized by SubjectID and ProjectID."""
     Keystroke = 'Keystroke'
-    """Rather than directly storing Codestates, the MainTable will contain InsertedText and DeletedText columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed."""
+    """Rather than directly storing Codestates, the MainTable will contain InsertText and DeleteText/DeleteLength columns tracking keystroke-level insertions and deletions, from which CodeStates can be reconstructed."""
     def __str__(self):
         return self.value
 
