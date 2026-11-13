@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/sample_data/falconcode/**)",
+      "Read(**/sample_data/cs1eng/**)",
+      "Bash(*sample_data/falconcode*)",
+      "Bash(*sample_data/cs1eng*)",
+      "Bash(*sample_data\\falconcode*)",
+      "Bash(*sample_data\\cs1eng*)",
+    ]
+  }
+}

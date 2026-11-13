@@ -31,6 +31,9 @@ where = ["src"]
 pythonpath = [
   "src"
 ]
+testpaths = [
+  "tests"
+]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements/requirements.in"] }
